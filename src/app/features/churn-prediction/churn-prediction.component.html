@@ -1,0 +1,238 @@
+<!-- src/app/features/churn-prediction/churn-prediction.component.html -->
+<div class="p-6 bg-gray-50 min-h-screen">
+  <div class="max-w-7xl mx-auto">
+    <!-- Header -->
+    <div class="mb-8">
+      <h1 class="text-3xl font-bold text-gray-800 flex items-center">
+        <i class="fas fa-user-slash mr-3 text-blue-500"></i>
+        <span>Predicción de Churn</span>
+      </h1>
+      <p class="mt-1 text-gray-500">Predice si un cliente abandonará el servicio basado en sus características.</p>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <!-- Form Card -->
+      <div class="lg:col-span-2 bg-white p-8 rounded-xl shadow-md">
+        <form [formGroup]="predictionForm" (ngSubmit)="onSubmit()">
+          
+          <!-- Personal Info -->
+          <div class="mb-8">
+            <h3 class="text-xl font-semibold text-gray-700 mb-4 border-b pb-2 flex items-center">
+              <i class="fas fa-user mr-2 text-gray-400"></i> Información Personal
+            </h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <label class="block text-sm font-medium text-gray-600 mb-1">ID Cliente (Opcional)</label>
+                <input type="text" formControlName="customerID" placeholder="Ej: 1234-ABCD" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500">
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-600 mb-1">Género *</label>
+                <select formControlName="gender" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500">
+                  <option *ngFor="let option of genderOptions" [value]="option">{{ option }}</option>
+                </select>
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-600 mb-1">Ciudadano Mayor *</label>
+                <select formControlName="SeniorCitizen" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500">
+                  <option [value]="0">No</option>
+                  <option [value]="1">Sí</option>
+                </select>
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-600 mb-1">Tiene Pareja *</label>
+                <select formControlName="Partner" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500">
+                  <option *ngFor="let option of yesNoOptions" [value]="option">{{ option }}</option>
+                </select>
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-600 mb-1">Tiene Dependientes *</label>
+                <select formControlName="Dependents" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500">
+                  <option *ngFor="let option of yesNoOptions" [value]="option">{{ option }}</option>
+                </select>
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-600 mb-1">Permanencia (meses) *</label>
+                <input type="number" formControlName="tenure" min="0" placeholder="Ej: 12" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500">
+              </div>
+            </div>
+          </div>
+
+          <!-- Services -->
+          <div class="mb-8">
+            <h3 class="text-xl font-semibold text-gray-700 mb-4 border-b pb-2 flex items-center">
+              <i class="fas fa-wifi mr-2 text-gray-400"></i> Servicios Contratados
+            </h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <label class="block text-sm font-medium text-gray-600 mb-1">Servicio Telefónico *</label>
+                <select formControlName="PhoneService" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500">
+                  <option *ngFor="let option of yesNoOptions" [value]="option">{{ option }}</option>
+                </select>
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-600 mb-1">Múltiples Líneas *</label>
+                <select formControlName="MultipleLines" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500">
+                  <option *ngFor="let option of yesNoOptions" [value]="option">{{ option }}</option>
+                  <option value="No phone service">Sin servicio telefónico</option>
+                </select>
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-600 mb-1">Servicio Internet *</label>
+                <select formControlName="InternetService" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500">
+                  <option *ngFor="let option of internetServiceOptions" [value]="option">{{ option }}</option>
+                </select>
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-600 mb-1">Seguridad Online *</label>
+                <select formControlName="OnlineSecurity" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500">
+                  <option *ngFor="let option of yesNoOptions" [value]="option">{{ option }}</option>
+                  <option value="No internet service">Sin servicio internet</option>
+                </select>
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-600 mb-1">Respaldo Online *</label>
+                <select formControlName="OnlineBackup" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500">
+                  <option *ngFor="let option of yesNoOptions" [value]="option">{{ option }}</option>
+                  <option value="No internet service">Sin servicio internet</option>
+                </select>
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-600 mb-1">Protección Dispositivo *</label>
+                <select formControlName="DeviceProtection" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500">
+                  <option *ngFor="let option of yesNoOptions" [value]="option">{{ option }}</option>
+                  <option value="No internet service">Sin servicio internet</option>
+                </select>
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-600 mb-1">Soporte Técnico *</label>
+                <select formControlName="TechSupport" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500">
+                  <option *ngFor="let option of yesNoOptions" [value]="option">{{ option }}</option>
+                  <option value="No internet service">Sin servicio internet</option>
+                </select>
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-600 mb-1">Streaming TV *</label>
+                <select formControlName="StreamingTV" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500">
+                  <option *ngFor="let option of yesNoOptions" [value]="option">{{ option }}</option>
+                  <option value="No internet service">Sin servicio internet</option>
+                </select>
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-600 mb-1">Streaming Películas *</label>
+                <select formControlName="StreamingMovies" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500">
+                  <option *ngFor="let option of yesNoOptions" [value]="option">{{ option }}</option>
+                  <option value="No internet service">Sin servicio internet</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <!-- Contract and Payments -->
+          <div class="mb-8">
+            <h3 class="text-xl font-semibold text-gray-700 mb-4 border-b pb-2 flex items-center">
+              <i class="fas fa-file-contract mr-2 text-gray-400"></i> Contrato y Pagos
+            </h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <label class="block text-sm font-medium text-gray-600 mb-1">Tipo de Contrato *</label>
+                <select formControlName="Contract" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500">
+                  <option *ngFor="let option of contractOptions" [value]="option">{{ option }}</option>
+                </select>
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-600 mb-1">Facturación sin Papel *</label>
+                <select formControlName="PaperlessBilling" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500">
+                  <option *ngFor="let option of yesNoOptions" [value]="option">{{ option }}</option>
+                </select>
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-600 mb-1">Método de Pago *</label>
+                <select formControlName="PaymentMethod" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500">
+                  <option *ngFor="let option of paymentMethodOptions" [value]="option">{{ option }}</option>
+                </select>
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-600 mb-1">Cargo Mensual ($) *</label>
+                <input type="number" formControlName="MonthlyCharges" min="0" step="0.01" placeholder="Ej: 85.50" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500">
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-600 mb-1">Total Acumulado ($) *</label>
+                <input type="number" formControlName="TotalCharges" min="0" step="0.01" placeholder="Ej: 1026.00" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500">
+              </div>
+            </div>
+          </div>
+
+          <!-- Actions -->
+          <div class="flex justify-end space-x-4 mt-8">
+            <button type="button" (click)="resetForm()" class="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-100 transition">
+              <i class="fas fa-redo mr-2"></i> Limpiar
+            </button>
+            <button type="submit" [disabled]="isLoading" class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition disabled:bg-blue-300">
+              <i class="fas fa-chart-line mr-2"></i>
+              {{ isLoading ? 'Procesando...' : 'Predecir Churn' }}
+            </button>
+          </div>
+        </form>
+      </div>
+
+      <!-- Result Card -->
+      <div class="lg:col-span-1">
+        <div *ngIf="!showResult" class="bg-white p-8 rounded-xl shadow-md text-center h-full flex flex-col justify-center">
+          <i class="fas fa-chart-line text-5xl text-gray-300 mb-4"></i>
+          <h3 class="text-lg font-semibold text-gray-700">Completa el formulario</h3>
+          <p class="text-gray-500 mt-1">Los resultados de la predicción aparecerán aquí.</p>
+        </div>
+
+        <div *ngIf="showResult && predictionResult" class="bg-white p-8 rounded-xl shadow-md">
+          <h2 class="text-xl font-semibold text-gray-800 mb-4">Resultado de la Predicción</h2>
+
+          <!-- Risk Indicator -->
+          <div class="text-center mb-6">
+            <div class="inline-block rounded-full p-4" [ngClass]="{
+              'bg-red-100': predictionResult.riskLevel === 'high',
+              'bg-yellow-100': predictionResult.riskLevel === 'medium',
+              'bg-green-100': predictionResult.riskLevel === 'low'
+            }">
+              <i class="fas text-4xl" [ngClass]="{
+                'fa-exclamation-triangle text-red-500': predictionResult.riskLevel === 'high',
+                'fa-exclamation-circle text-yellow-500': predictionResult.riskLevel === 'medium',
+                'fa-check-circle text-green-500': predictionResult.riskLevel === 'low'
+              }"></i>
+            </div>
+            <h3 class="text-2xl font-bold mt-2" [ngClass]="{
+              'text-red-600': predictionResult.riskLevel === 'high',
+              'text-yellow-600': predictionResult.riskLevel === 'medium',
+              'text-green-600': predictionResult.riskLevel === 'low'
+            }">{{ getRiskLabel() }}</h3>
+            <p class="text-gray-600">Probabilidad de Churn: <strong>{{ (predictionResult.churnProbability * 100).toFixed(1) }}%</strong></p>
+          </div>
+
+          <!-- Info -->
+          <div class="space-y-3 text-sm">
+            <div class="flex justify-between items-center">
+              <span class="text-gray-500">Cliente ID:</span>
+              <span class="font-semibold text-gray-800">{{ predictionResult.customerID }}</span>
+            </div>
+            <div class="flex justify-between items-center">
+              <span class="text-gray-500">¿Abandonará el servicio?:</span>
+              <span class="px-2 py-1 text-xs font-bold rounded-full" [ngClass]="predictionResult.willChurn ? 'bg-red-500 text-white' : 'bg-green-500 text-white'">
+                {{ predictionResult.willChurn ? 'SÍ' : 'NO' }}
+              </span>
+            </div>
+          </div>
+
+          <!-- Recommendations -->
+          <div class="mt-8" *ngIf="predictionResult.recommendations?.length">
+            <h4 class="font-semibold text-gray-700 mb-2 flex items-center"><i class="fas fa-lightbulb mr-2 text-yellow-400"></i> Recomendaciones</h4>
+            <ul class="space-y-2">
+              <li *ngFor="let rec of predictionResult.recommendations" class="flex items-start">
+                <i class="fas fa-check text-green-500 mt-1 mr-2"></i>
+                <span class="text-gray-600">{{ rec }}</span>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
