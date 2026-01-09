@@ -16,19 +16,19 @@ export class SidebarComponent {
   
   menuItems = [
     {
-      title: 'Dashboard',
+      title: 'Panel 📊',
       icon: 'fas fa-home',
       route: '/dashboard',
       active: false
     },
     {
-      title: 'Predicción de Churn',
+      title: 'Predicción de Churn 📉',
       icon: 'fas fa-user-slash',
       route: '/churn-prediction',
       active: false
     },
     {
-      title: 'Estadísticas Empresa',
+      title: 'Estadísticas Empresa 📈',
       icon: 'fas fa-chart-bar',
       route: '/company-statistics',
       active: false
