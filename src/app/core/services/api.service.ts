@@ -2,7 +2,7 @@
 
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { Observable, of } from 'rxjs';
+import { Observable, of, throwError } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
 import { 
   Customer, 
@@ -92,6 +92,27 @@ export class ApiService {
         return of(this.getMockRevenueStats());
       })
     );
+  }
+
+  // ============= AUTENTICACIÓN (Simulada) =============
+
+  login(credentials: {username: string, password: string}): Observable<any> {
+    // NOTA: Cuando tengas backend, descomenta la siguiente línea y borra el resto del if/else
+    // return this.http.post(`${this.apiUrl}/auth/login`, credentials);
+
+    if (credentials.username === 'admin' && credentials.password === '1234') {
+      return of({ token: 'mock-token-12345', user: { name: 'Admin', role: 'admin' } });
+    } else {
+      return throwError(() => new Error('Usuario o contraseña incorrectos'));
+    }
+  }
+
+  logout(): void {
+    localStorage.removeItem('token');
+  }
+
+  isAuthenticated(): boolean {
+    return !!localStorage.getItem('token');
   }
 
   getAllCustomers(): Observable<Customer[]> {
