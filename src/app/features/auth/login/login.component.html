@@ -2,7 +2,7 @@
   <div class="login-card">
     <h2>Acceso Administrativo</h2>
     <p class="subtitle">Ingresa tus credenciales para continuar</p>
-    
+
     <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
       <div class="form-group">
         <label for="username">Usuario</label>
@@ -12,7 +12,7 @@
           formControlName="username"
           placeholder="Ej: admin">
       </div>
-      
+
       <div class="form-group">
         <label for="password">Contraseña</label>
         <input 

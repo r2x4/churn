@@ -1,0 +1,6 @@
+{
+  "rules": {
+    "attr-case": "off",
+    "doctype-first": "off"
+  }
+}
