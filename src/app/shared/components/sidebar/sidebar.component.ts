@@ -32,6 +32,12 @@ export class SidebarComponent {
       icon: 'fas fa-chart-bar',
       route: '/company-statistics',
       active: false
+    },
+    {
+      title: 'Administración ⚙️',
+      icon: 'fas fa-cog',
+      route: '/admin',
+      active: false
     }
   ];
 

@@ -2,11 +2,13 @@ import { Routes } from '@angular/router';
 import { ChurnPredictionComponent } from './features/churn-prediction/churn-prediction.component';
 import { CompanyStatisticsComponent } from './features/company-statistics/company-statistics.component';
 import { DashboardComponent } from './features/dashboard/dashboard.component';
+import { AdminComponent } from './features/admin/admin.component'; // Import AdminComponent
 
 export const routes: Routes = [
     { path: 'dashboard', component: DashboardComponent },
     { path: 'churn-prediction', component: ChurnPredictionComponent },
     { path: 'company-statistics', component: CompanyStatisticsComponent },
+    { path: 'admin', component: AdminComponent }, // Add the admin route
     { path: '', redirectTo: '/dashboard', pathMatch: 'full' },
     { path: '**', redirectTo: '/dashboard' }
 ];
