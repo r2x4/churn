@@ -3,11 +3,11 @@
   justify-content: center;
   align-items: center;
   height: 100vh;
-  background-color: #ede7f6;
+  background-color: #f0eafa;
 }
 
 .login-card {
-  background: #e8f5e9;
+  background: #c5fcca;
   padding: 2rem;
   border-radius: 8px;
   box-shadow: 0 4px 6px rgba(0,0,0,0.1);
@@ -51,7 +51,7 @@ input {
 .btn-login {
   width: 100%;
   padding: 0.75rem;
-  background-color: #1b5e20;
+  background-color: #4cae52;
   color: white;
   border: none;
   border-radius: 4px;
