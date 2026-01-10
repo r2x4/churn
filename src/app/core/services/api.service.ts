@@ -17,7 +17,7 @@ import {
   providedIn: 'root'
 })
 export class ApiService {
-  private apiUrl = 'http://localhost:8000/api'; // Cambiar por tu API
+  private apiUrl = 'http://localhost:8000/api'; // Cambiar apiReest de consumo
 
   constructor(private http: HttpClient) {}
 
@@ -97,7 +97,7 @@ export class ApiService {
   // ============= AUTENTICACIÓN (Simulada) =============
 
   login(credentials: {username: string, password: string}): Observable<any> {
-    // NOTA: Cuando tengas backend, descomenta la siguiente línea y borra el resto del if/else
+    // nota para los backends : al tener backend, se descomenta la siguiente línea y borra el resto del if/else
     // return this.http.post(`${this.apiUrl}/auth/login`, credentials);
 
     if (credentials.username === 'admin' && credentials.password === '1234') {

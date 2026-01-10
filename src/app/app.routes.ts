@@ -10,8 +10,8 @@ export const routes: Routes = [
     { path: 'dashboard', component: DashboardComponent },
     { path: 'churn-prediction', component: ChurnPredictionComponent },
     { path: 'company-statistics', component: CompanyStatisticsComponent },
-    { path: 'admin', component: AdminComponent, canActivate: [AuthGuard] }, // Protegemos la ruta con AuthGuard
-    { path: 'login', component: LoginComponent }, // Agregamos la ruta de login
+    { path: 'admin', component: AdminComponent, canActivate: [AuthGuard] }, // Proteger la ruta con AuthGuard
+    { path: 'login', component: LoginComponent }, // Agregar la ruta de login
     { path: '', redirectTo: '/dashboard', pathMatch: 'full' },
     { path: '**', redirectTo: '/dashboard' }
 ];
