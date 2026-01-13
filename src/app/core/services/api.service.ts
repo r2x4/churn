@@ -1,23 +1,36 @@
 // src/app/core/services/api.service.ts
 
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { HttpClient, HttpErrorResponse, HttpHeaders } from '@angular/common/http';
 import { Observable, of, throwError } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
-import { 
-  Customer, 
-  ChurnPredictionRequest, 
+import { environment } from '../../../environments/environment';
+import {
+  Customer,
+  ChurnPredictionRequest,
   ChurnPredictionResponse,
   CompanyStatistics,
   ChurnByCategory,
   RevenueStats
 } from '../models/customer.model';
 
+type LoginRequest = {
+  email: string;
+  password: string;
+};
+
+type ApiResponse<T> = {
+  time: string;
+  message: string;
+  success: boolean;
+  data: T;
+};
+
 @Injectable({
   providedIn: 'root'
 })
 export class ApiService {
-  private apiUrl = 'http://localhost:8000/api'; // Cambiar apiReest de consumo
+  private apiUrl = environment.apiBaseUrl;
 
   constructor(private http: HttpClient) {}
 
@@ -29,7 +42,7 @@ export class ApiService {
   }
 
   // ============= PREDICCIÓN DE CHURN =============
-  
+
   predictChurn(data: ChurnPredictionRequest): Observable<ChurnPredictionResponse> {
     return this.http.post<ChurnPredictionResponse>(
       `${this.apiUrl}/predict-churn`,
@@ -94,17 +107,29 @@ export class ApiService {
     );
   }
 
-  // ============= AUTENTICACIÓN (Simulada) =============
+  // ============= AUTENTICACIÓN =============
 
-  login(credentials: {username: string, password: string}): Observable<any> {
-    // nota para los backends : al tener backend, se descomenta la siguiente línea y borra el resto del if/else
-    // return this.http.post(`${this.apiUrl}/auth/login`, credentials);
+  login(credentials: LoginRequest): Observable<{ token: string }> {
+    return this.http
+      .post<ApiResponse<string>>(`${environment.authBaseUrl}/login`, credentials, { headers: this.getHeaders() })
+      .pipe(
+        map((response) => {
+          if (!response?.success || !response.data) {
+            throw new Error(response?.message || 'Login inválido');
+          }
+          return { token: response.data };
+        }),
+        catchError((err: unknown) => {
+          if (err instanceof HttpErrorResponse) {
+            const backendMessage = (err.error as any)?.message;
+            const message = backendMessage || err.message || 'Error de autenticación';
+            return throwError(() => new Error(message));
+          }
 
-    if (credentials.username === 'admin' && credentials.password === '1234') {
-      return of({ token: 'mock-token-12345', user: { name: 'Admin', role: 'admin' } });
-    } else {
-      return throwError(() => new Error('Usuario o contraseña incorrectos'));
-    }
+          const message = err instanceof Error ? err.message : 'Error de autenticación';
+          return throwError(() => new Error(message));
+        })
+      );
   }
 
   logout(): void {

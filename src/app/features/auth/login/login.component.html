@@ -6,20 +6,12 @@
     <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
       <div class="form-group">
         <label for="username">Usuario</label>
-        <input 
-          type="text" 
-          id="username" 
-          formControlName="username"
-          placeholder="Ej: admin">
+        <input type="text" id="username" formControlName="username" placeholder="Ej: admin">
       </div>
 
       <div class="form-group">
         <label for="password">Contraseña</label>
-        <input 
-          type="password" 
-          id="password" 
-          formControlName="password"
-          placeholder="Ej: 1234">
+        <input type="password" id="password" formControlName="password" placeholder="Ej: 1234">
       </div>
 
       <div *ngIf="errorMessage" class="error-message">

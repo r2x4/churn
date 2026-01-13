@@ -1,12 +1,14 @@
 <!-- src/app/shared/components/sidebar/sidebar.component.html -->
-<aside class="bg-gray-800 text-white h-screen flex flex-col transition-all duration-300" [ngClass]="isCollapsed ? 'w-20' : 'w-64'">
+<aside class="bg-gray-800 text-white h-screen flex flex-col transition-all duration-300"
+  [ngClass]="isCollapsed ? 'w-20' : 'w-64'">
   <!-- Logo/Header -->
   <div class="flex items-center justify-between p-4 border-b border-gray-700">
     <div class="flex items-center space-x-2" *ngIf="!isCollapsed">
       <i class="fas fa-signal text-blue-400 text-2xl"></i>
       <span class="text-xl font-bold">Telecom</span>
     </div>
-    <button (click)="toggleSidebar()" class="p-2 rounded-md hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500">
+    <button (click)="toggleSidebar()"
+      class="p-2 rounded-md hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500">
       <i class="fas" [ngClass]="isCollapsed ? 'fa-bars' : 'fa-times'"></i>
     </button>
   </div>
@@ -15,8 +17,8 @@
   <nav class="flex-1 py-4">
     <ul>
       <li *ngFor="let item of menuItems" (click)="navigate(item.route)"
-          class="flex items-center px-4 py-3 cursor-pointer hover:bg-gray-700 rounded-md mx-2 transition-colors duration-200"
-          [ngClass]="isActive(item.route) ? 'bg-blue-600' : ''">
+        class="flex items-center px-4 py-3 cursor-pointer hover:bg-gray-700 rounded-md mx-2 transition-colors duration-200"
+        [ngClass]="isActive(item.route) ? 'bg-blue-600' : ''">
         <i [class]="item.icon" class="text-lg w-8 text-center"></i>
         <span class="ml-4 font-medium" *ngIf="!isCollapsed">{{ item.title }}</span>
       </li>
@@ -24,10 +26,11 @@
   </nav>
 
   <!-- Footer -->
-  <div class="p-4 border-t border-gray-700" *ngIf="!isCollapsed">
-    <div class="flex items-center space-x-2 p-2 bg-gray-700 rounded-md">
-      <i class="fas fa-user-circle text-2xl"></i>
-
+  <div class="p-4 border-t border-gray-700">
+    <div (click)="logout()"
+      class="flex items-center space-x-2 p-2 bg-red-900/50 hover:bg-red-800 cursor-pointer rounded-md transition-colors">
+      <i class="fas fa-sign-out-alt text-xl text-red-400"></i>
+      <span class="font-medium text-sm" *ngIf="!isCollapsed">Cerrar Sesión</span>
     </div>
   </div>
 </aside>

@@ -3,18 +3,19 @@
 
   <div class="border-b border-gray-200">
     <nav class="-mb-px flex space-x-8" aria-label="Tabs">
-      <button
-        (click)="selectTab('predictions')"
+      <button (click)="selectTab('predictions')"
         [ngClass]="{'border-indigo-500 text-indigo-600': selectedTab === 'predictions', 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300': selectedTab !== 'predictions'}"
-        class="whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm"
-      >
+        class="whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm">
         Predicciones
       </button>
-      <button
-        (click)="selectTab('users')"
+      <button (click)="selectTab('history')"
+        [ngClass]="{'border-indigo-500 text-indigo-600': selectedTab === 'history', 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300': selectedTab !== 'history'}"
+        class="whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm">
+        Historial de Datos
+      </button>
+      <button (click)="selectTab('users')"
         [ngClass]="{'border-indigo-500 text-indigo-600': selectedTab === 'users', 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300': selectedTab !== 'users'}"
-        class="whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm"
-      >
+        class="whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm">
         Gestión de Usuarios
       </button>
     </nav>
@@ -22,6 +23,7 @@
 
   <div class="mt-4">
     <div *ngIf="selectedTab === 'predictions'">
+      <!-- ... (se mantiene igual) ... -->
       <h2 class="text-xl font-semibold mb-2">Sección de Predicciones</h2>
       <p>Gestionaremos los modelos de predicción, ver logs y reportes.</p>
 
@@ -30,7 +32,7 @@
       <pre class="bg-gray-100 p-3 rounded-md text-sm overflow-auto mb-4">{{ sampleCustomerInput | json }}</pre>
 
       <button (click)="makePrediction()"
-              class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">
+        class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">
         Realizar Predicción
       </button>
 
@@ -45,10 +47,98 @@
       </div>
     </div>
 
+    <!-- Nueva pestaña de Historial Componentizada -->
+    <div *ngIf="selectedTab === 'history'">
+      <div class="flex justify-between items-center mb-4">
+        <div>
+          <h2 class="text-xl font-semibold">Gestión de Historial</h2>
+          <p class="text-sm text-gray-500">Administración de predicciones y logs de sistema.</p>
+        </div>
+        <div class="flex space-x-2">
+          <button (click)="openCreateForm()"
+            class="bg-green-600 hover:bg-green-700 text-white text-sm py-2 px-3 rounded shadow">
+            ➕ Nuevo Registro
+          </button>
+          <button (click)="toggleDeleted()"
+            class="bg-gray-600 hover:bg-gray-700 text-white text-sm py-2 px-3 rounded shadow">
+            {{ viewingDeleted ? '📂 Ver Activos' : '🗑️ Ver Eliminados' }}
+          </button>
+          <button (click)="loadHistory()"
+            class="bg-indigo-600 hover:bg-indigo-700 text-white text-sm py-2 px-3 rounded shadow">
+            🔄 Refrescar
+          </button>
+        </div>
+      </div>
+
+      <div *ngIf="isLoadingHistory" class="text-center py-10">
+        <p class="text-gray-500 italic">Consultando al backend...</p>
+      </div>
+
+      <div *ngIf="!isLoadingHistory && historyList.length === 0" class="bg-yellow-50 p-6 rounded-md text-center">
+        <p class="text-yellow-700">No hay registros en la lista de {{ viewingDeleted ? 'eliminados' : 'activos' }}.</p>
+      </div>
+
+      <!-- Componente Tabla -->
+      <app-historial-table *ngIf="!isLoadingHistory && historyList.length > 0" [historyList]="historyList"
+        [isDeletedView]="viewingDeleted" (onView)="viewHistoryDetail($event)" (onEdit)="openEditForm($event)"
+        (onDelete)="deleteHistory($event)">
+      </app-historial-table>
+
+      <!-- Componente Detalle (Modal) -->
+      <app-historial-detail-modal *ngIf="showDetail" [item]="selectedHistory" (onClose)="closeDetail()">
+      </app-historial-detail-modal>
+
+      <!-- Componente Formulario (Modal) -->
+      <app-historial-form *ngIf="showForm" [editingItem]="editingHistory" (onSave)="saveHistory($event)"
+        (onCancel)="showForm = false">
+      </app-historial-form>
+    </div>
+
     <div *ngIf="selectedTab === 'users'">
-      <h2 class="text-xl font-semibold mb-2">Sección de Gestión de Usuarios</h2>
-      <p>Gestionaremos los usuarios del sistema.</p>
-      <!-- Future content for user management -->
+      <div class="flex justify-between items-center mb-4">
+        <div>
+          <h2 class="text-xl font-semibold">Gestión de Usuarios</h2>
+          <p class="text-sm text-gray-500">Administra los usuarios y sus roles en el sistema.</p>
+        </div>
+        <div class="flex space-x-2">
+          <button (click)="openCreateUserForm()"
+            class="bg-green-600 hover:bg-green-700 text-white text-sm py-2 px-3 rounded shadow">
+            ➕ Nuevo Usuario
+          </button>
+          <button (click)="toggleDeletedUsers()"
+            class="bg-gray-600 hover:bg-gray-700 text-white text-sm py-2 px-3 rounded shadow">
+            {{ viewingDeletedUsers ? '📂 Ver Activos' : '🗑️ Ver Eliminados' }}
+          </button>
+          <button (click)="loadUsers()"
+            class="bg-indigo-600 hover:bg-indigo-700 text-white text-sm py-2 px-3 rounded shadow">
+            🔄 Refrescar
+          </button>
+        </div>
+      </div>
+
+      <div *ngIf="isLoadingUsers" class="text-center py-10">
+        <p class="text-gray-500 italic">Cargando usuarios...</p>
+      </div>
+
+      <div *ngIf="!isLoadingUsers && userList.length === 0" class="bg-yellow-50 p-6 rounded-md text-center">
+        <p class="text-yellow-700">No hay usuarios en la lista de {{ viewingDeletedUsers ? 'eliminados' : 'activos' }}.
+        </p>
+      </div>
+
+      <!-- Componente Tabla de Usuarios -->
+      <app-usuario-table *ngIf="!isLoadingUsers && userList.length > 0" [userList]="userList"
+        [isDeletedView]="viewingDeletedUsers" (onView)="viewUserDetail($event)" (onEdit)="openEditUserForm($event)"
+        (onDelete)="deleteUser($event)">
+      </app-usuario-table>
+
+      <!-- Modal de Detalle de Usuario -->
+      <app-usuario-detail-modal *ngIf="showUserDetail" [user]="selectedUser" (onClose)="showUserDetail = false">
+      </app-usuario-detail-modal>
+
+      <!-- Formulario de Usuario -->
+      <app-usuario-form *ngIf="showUserForm" [editingUser]="editingUser" (onSave)="saveUser($event)"
+        (onCancel)="showUserForm = false">
+      </app-usuario-form>
     </div>
   </div>
 </div>

@@ -29,15 +29,14 @@ export class LoginComponent {
     this.errorMessage = null;
     if (this.loginForm.valid) {
       const { username, password } = this.loginForm.value;
-      // ApiService espera un objeto con las credenciales
-      this.apiService.login({ username, password }).subscribe({
+      this.apiService.login({ email: username, password }).subscribe({
         next: (response) => {
           // Login exitoso: guardamos token y redirigimos
           localStorage.setItem('token', response.token);
           this.router.navigate(['/admin']);
         },
         error: (err) => {
-          this.errorMessage = 'Usuario o contraseña incorrectos.';
+          this.errorMessage = err?.message || 'Error al iniciar sesión.';
           console.error('Login error:', err);
         }
       });

@@ -2,12 +2,13 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { CustomerInput, PredictionOutput } from '../models/customer-prediction.model';
+import { environment } from '../../../environments/environment';
 
 @Injectable({
   providedIn: 'root'
 })
 export class PredictionService {
-  private apiUrl = 'http://163.192.138.89:8084/predict'; // Reemplaza con la URL real de tu API
+  private apiUrl = environment.predictionUrl;
 
   constructor(private http: HttpClient) { }
 

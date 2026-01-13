@@ -1,8 +1,7 @@
-// src/app/shared/components/sidebar/sidebar.component.ts
-
 import { Component } from '@angular/core';
 import { Router, RouterModule } from '@angular/router';
 import { CommonModule } from '@angular/common';
+import { ApiService } from '../../../core/services/api.service';
 
 @Component({
   selector: 'app-sidebar',
@@ -13,7 +12,7 @@ import { CommonModule } from '@angular/common';
 })
 export class SidebarComponent {
   isCollapsed = false;
-  
+
   menuItems = [
     {
       title: 'Panel 📊',
@@ -41,7 +40,17 @@ export class SidebarComponent {
     }
   ];
 
-  constructor(private router: Router) {}
+  constructor(
+    private router: Router,
+    private apiService: ApiService
+  ) { }
+
+  logout(): void {
+    if (confirm('¿Estás seguro de que deseas cerrar la sesión?')) {
+      this.apiService.logout();
+      this.router.navigate(['/login']);
+    }
+  }
 
   toggleSidebar(): void {
     this.isCollapsed = !this.isCollapsed;
