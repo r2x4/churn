@@ -56,6 +56,10 @@ export class SidebarComponent {
     this.isCollapsed = !this.isCollapsed;
   }
 
+  isLoggedIn(): boolean {
+    return this.apiService.isAuthenticated();
+  }
+
   navigate(route: string): void {
     this.menuItems.forEach(item => item.active = false);
     const selectedItem = this.menuItems.find(item => item.route === route);
@@ -66,6 +70,10 @@ export class SidebarComponent {
   }
 
   isActive(route: string): boolean {
-    return this.router.url === route;
+    const currentUrl = this.router.url;
+    if (route === '/admin' && currentUrl.includes('/login')) {
+      return true;
+    }
+    return currentUrl === route;
   }
 }

@@ -13,13 +13,4 @@ import { filter } from 'rxjs';
 })
 export class App {
   protected readonly title = signal('telecom-dashboard');
-  showSidebar = true;
-
-  constructor(private router: Router) {
-    this.router.events.pipe(
-      filter(event => event instanceof NavigationEnd)
-    ).subscribe((event: any) => {
-      this.showSidebar = !event.urlAfterRedirects.includes('/login');
-    });
-  }
 }
