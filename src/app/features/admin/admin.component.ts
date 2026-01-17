@@ -12,6 +12,7 @@ import { Usuario, UsuarioDto } from '../../core/models/usuario.model';
 import { UsuarioTableComponent } from './components/users/usuario-table.component';
 import { UsuarioDetailModalComponent } from './components/users/usuario-detail-modal.component';
 import { UsuarioFormComponent } from './components/users/usuario-form.component';
+import { ConfirmModalComponent } from './components/confirm-modal.component';
 
 @Component({
   selector: 'app-admin',
@@ -23,7 +24,8 @@ import { UsuarioFormComponent } from './components/users/usuario-form.component'
     HistorialFormComponent,
     UsuarioTableComponent,
     UsuarioDetailModalComponent,
-    UsuarioFormComponent
+    UsuarioFormComponent,
+    ConfirmModalComponent
   ],
   templateUrl: './admin.component.html',
   styleUrls: ['./admin.component.css']
@@ -52,6 +54,14 @@ export class AdminComponent {
   editingUser: Usuario | null = null;
   showUserForm: boolean = false;
   showUserDetail: boolean = false;
+
+  // Variables para Confirmación Personalizada
+  showConfirmModal: boolean = false;
+  confirmModalTitle: string = '';
+  confirmModalMessage: string = '';
+  confirmModalType: 'danger' | 'success' | 'info' = 'danger';
+  confirmModalButtonText: string = 'Confirmar';
+  pendingAction: (() => void) | null = null;
 
   // Sample customer data for demonstration
   sampleCustomerInput: CustomerInput = {
@@ -150,9 +160,16 @@ export class AdminComponent {
       : this.historialService.crear(dto);
 
     request.subscribe(() => {
-      alert(this.editingHistory ? 'Registro editado' : 'Registro creado');
-      this.showForm = false;
-      this.loadHistory();
+      this.confirmModalTitle = this.editingHistory ? 'Éxito' : 'Éxito';
+      this.confirmModalMessage = this.editingHistory ? 'Registro editado correctamente' : 'Registro creado correctamente';
+      this.confirmModalType = 'success';
+      this.confirmModalButtonText = 'Aceptar';
+      this.pendingAction = () => {
+        this.showUserForm = false;
+        this.showForm = false;
+        this.loadHistory();
+      };
+      this.showConfirmModal = true;
     });
   }
 
@@ -208,33 +225,63 @@ export class AdminComponent {
   }
 
   saveUser(dto: UsuarioDto): void {
+    if (this.editingUser) {
+      dto.id = this.editingUser.id;
+    }
     const request = this.editingUser
       ? this.usuarioService.editar(this.editingUser.id, dto)
       : this.usuarioService.crear(dto);
 
     request.subscribe(() => {
-      alert(this.editingUser ? 'Usuario editado' : 'Usuario creado');
-      this.showUserForm = false;
-      this.loadUsers();
+      this.confirmModalTitle = 'Éxito';
+      this.confirmModalMessage = this.editingUser ? 'Usuario editado correctamente' : 'Usuario creado correctamente';
+      this.confirmModalType = 'success';
+      this.confirmModalButtonText = 'Aceptar';
+      this.pendingAction = () => {
+        this.showUserForm = false;
+        this.loadUsers();
+      };
+      this.showConfirmModal = true;
     });
   }
 
   deleteUser(id: string): void {
-    if (confirm('¿Estás seguro de eliminar este usuario?')) {
+    this.confirmModalTitle = 'Eliminar Usuario';
+    this.confirmModalMessage = '¿Estás seguro de que deseas eliminar este usuario? Esta acción es un borrado lógico.';
+    this.confirmModalType = 'danger';
+    this.confirmModalButtonText = 'Eliminar';
+    this.pendingAction = () => {
       this.usuarioService.eliminar(id).subscribe(() => {
-        alert('Usuario eliminado lógicamente');
         this.loadUsers();
       });
-    }
+    };
+    this.showConfirmModal = true;
   }
 
   deleteHistory(id: number): void {
-    if (confirm('¿Estás seguro de eliminar este registro (borrado lógico)?')) {
+    this.confirmModalTitle = 'Eliminar Registro';
+    this.confirmModalMessage = '¿Estás seguro de que deseas eliminar este registro del historial?';
+    this.confirmModalType = 'danger';
+    this.confirmModalButtonText = 'Eliminar';
+    this.pendingAction = () => {
       this.historialService.eliminar(id).subscribe(() => {
-        alert('Registro eliminado lógicamente');
         this.loadHistory();
       });
+    };
+    this.showConfirmModal = true;
+  }
+
+  executePendingAction(): void {
+    if (this.pendingAction) {
+      this.pendingAction();
+      this.pendingAction = null;
     }
+    this.showConfirmModal = false;
+  }
+
+  cancelPendingAction(): void {
+    this.pendingAction = null;
+    this.showConfirmModal = false;
   }
 
   // Método simplificado para probar el POST/PUT

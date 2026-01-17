@@ -20,7 +20,7 @@ export class LoginComponent {
     private router: Router
   ) {
     this.loginForm = new FormGroup({
-      username: new FormControl('', Validators.required),
+      email: new FormControl('', [Validators.required, Validators.email]),
       password: new FormControl('', Validators.required)
     });
   }
@@ -28,8 +28,8 @@ export class LoginComponent {
   onSubmit(): void {
     this.errorMessage = null;
     if (this.loginForm.valid) {
-      const { username, password } = this.loginForm.value;
-      this.apiService.login({ email: username, password }).subscribe({
+      const { email, password } = this.loginForm.value;
+      this.apiService.login({ email, password }).subscribe({
         next: (response) => {
           // Login exitoso: guardamos token y redirigimos
           localStorage.setItem('token', response.token);

@@ -33,4 +33,10 @@
       <span class="font-medium text-sm" *ngIf="!isCollapsed">Cerrar Sesión</span>
     </div>
   </div>
+
+  <!-- Modal de Confirmación de Cierre de Sesión -->
+  <app-confirm-modal *ngIf="showLogoutModal" title="Cerrar Sesión"
+    message="¿Estás seguro de que deseas cerrar la sesión?" confirmText="Cerrar Sesión" type="info"
+    (onConfirm)="confirmLogout()" (onCancel)="cancelLogout()">
+  </app-confirm-modal>
 </aside>

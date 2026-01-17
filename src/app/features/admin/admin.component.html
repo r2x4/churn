@@ -139,6 +139,11 @@
       <app-usuario-form *ngIf="showUserForm" [editingUser]="editingUser" (onSave)="saveUser($event)"
         (onCancel)="showUserForm = false">
       </app-usuario-form>
+
+      <!-- Modal de Confirmación -->
+      <app-confirm-modal *ngIf="showConfirmModal" [title]="confirmModalTitle" [message]="confirmModalMessage"
+        [confirmText]="confirmModalButtonText" [type]="confirmModalType" (onConfirm)="executePendingAction()" (onCancel)="cancelPendingAction()">
+      </app-confirm-modal>
     </div>
   </div>
 </div>

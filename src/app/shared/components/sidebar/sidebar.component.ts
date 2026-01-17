@@ -2,16 +2,20 @@ import { Component } from '@angular/core';
 import { Router, RouterModule } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { ApiService } from '../../../core/services/api.service';
+import { ConfirmModalComponent } from '../../../features/admin/components/confirm-modal.component';
 
 @Component({
   selector: 'app-sidebar',
   standalone: true,
-  imports: [CommonModule, RouterModule],
+  imports: [CommonModule, RouterModule, ConfirmModalComponent],
   templateUrl: './sidebar.component.html',
   styleUrls: ['./sidebar.component.css']
 })
 export class SidebarComponent {
   isCollapsed = false;
+
+  // Variables para el modal de cierre de sesión
+  showLogoutModal = false;
 
   menuItems = [
     {
@@ -46,10 +50,17 @@ export class SidebarComponent {
   ) { }
 
   logout(): void {
-    if (confirm('¿Estás seguro de que deseas cerrar la sesión?')) {
-      this.apiService.logout();
-      this.router.navigate(['/login']);
-    }
+    this.showLogoutModal = true;
+  }
+
+  confirmLogout(): void {
+    this.apiService.logout();
+    this.router.navigate(['/login']);
+    this.showLogoutModal = false;
+  }
+
+  cancelLogout(): void {
+    this.showLogoutModal = false;
   }
 
   toggleSidebar(): void {
