@@ -1,15 +1,14 @@
 // src/app/core/models/usuario.model.ts
 
-export interface Rol {
-    id: number;
-    nombre: string;
-}
+import { Rol } from './rol.model';
 
 export interface Usuario {
     id: string;
     nombre: string;
-    papellido: string;  // Backend devuelve en minúsculas
-    sapellido: string;  // Backend devuelve en minúsculas
+    papellido: string;
+    sapellido: string;
+    pApellido?: string; // Possible backend camelCase
+    sApellido?: string; // Possible backend camelCase
     email: string;
     telefono: string;
     fechaNacimiento: string;
@@ -34,4 +33,6 @@ export interface UsuarioDto {
     tieneConyuge: boolean;
     tieneDependientes: boolean;
     roles?: number[]; // IDs de los roles
+    pApellido?: string;
+    sApellido?: string;
 }

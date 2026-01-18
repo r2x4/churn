@@ -25,19 +25,22 @@ export class LoginComponent {
     });
   }
 
+  loading = false;
+
   onSubmit(): void {
     this.errorMessage = null;
     if (this.loginForm.valid) {
+      this.loading = true;
       const { email, password } = this.loginForm.value;
       this.apiService.login({ email, password }).subscribe({
         next: (response) => {
-          // Login exitoso: guardamos token y redirigimos
           localStorage.setItem('token', response.token);
           this.router.navigate(['/admin']);
+          this.loading = false;
         },
         error: (err) => {
           this.errorMessage = err?.message || 'Error al iniciar sesión.';
-          console.error('Login error:', err);
+          this.loading = false;
         }
       });
     } else {

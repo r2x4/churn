@@ -22,15 +22,22 @@ import { Usuario } from '../../../../core/models/usuario.model';
         <tbody class="divide-y divide-gray-200 bg-white">
           <tr *ngFor="let user of userList">
             <td class="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900">
-              {{ user.nombre }} {{ user.papellido }} {{ user.sapellido }}
+              {{ user.nombre }} {{ user.pApellido || user.papellido }} {{ user.sApellido || user.sapellido }}
             </td>
             <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
               {{ user.email }}
             </td>
             <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-              <span *ngFor="let rol of user.roles" class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800 mr-1">
-                {{ rol.nombre }}
-              </span>
+              <ng-container *ngIf="hasAdminRole(user); else showAllRoles">
+                 <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-purple-100 text-purple-800 mr-1">
+                    ADMIN
+                 </span>
+              </ng-container>
+              <ng-template #showAllRoles>
+                  <span *ngFor="let rol of user.roles" class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800 mr-1">
+                    {{ rol.nombre }}
+                  </span>
+              </ng-template>
             </td>
             <td class="whitespace-nowrap px-3 py-4 text-sm font-medium space-x-2">
               <button (click)="onView.emit(user.id)" class="text-blue-600 hover:text-blue-900">🔍 Ver</button>
@@ -50,4 +57,8 @@ export class UsuarioTableComponent {
   @Output() onView = new EventEmitter<string>();
   @Output() onEdit = new EventEmitter<Usuario>();
   @Output() onDelete = new EventEmitter<string>();
+
+  hasAdminRole(user: Usuario): boolean {
+    return user.roles && user.roles.some(r => r.nombre.toUpperCase() === 'ADMIN' || r.nombre.toUpperCase() === 'ROLE_ADMIN');
+  }
 }

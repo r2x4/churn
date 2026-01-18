@@ -13,6 +13,7 @@ import { UsuarioTableComponent } from './components/users/usuario-table.componen
 import { UsuarioDetailModalComponent } from './components/users/usuario-detail-modal.component';
 import { UsuarioFormComponent } from './components/users/usuario-form.component';
 import { ConfirmModalComponent } from './components/confirm-modal.component';
+import { RolesListComponent } from './components/roles/roles-list.component';
 
 @Component({
   selector: 'app-admin',
@@ -25,7 +26,8 @@ import { ConfirmModalComponent } from './components/confirm-modal.component';
     UsuarioTableComponent,
     UsuarioDetailModalComponent,
     UsuarioFormComponent,
-    ConfirmModalComponent
+    ConfirmModalComponent,
+    RolesListComponent
   ],
   templateUrl: './admin.component.html',
   styleUrls: ['./admin.component.css']
@@ -232,16 +234,75 @@ export class AdminComponent {
       ? this.usuarioService.editar(this.editingUser.id, dto)
       : this.usuarioService.crear(dto);
 
-    request.subscribe(() => {
-      this.confirmModalTitle = 'Éxito';
-      this.confirmModalMessage = this.editingUser ? 'Usuario editado correctamente' : 'Usuario creado correctamente';
-      this.confirmModalType = 'success';
-      this.confirmModalButtonText = 'Aceptar';
-      this.pendingAction = () => {
-        this.showUserForm = false;
-        this.loadUsers();
-      };
-      this.showConfirmModal = true;
+    request.subscribe({
+      next: (response) => {
+        // Sync Roles Manually because backend update might not handle it
+        const savedUser = response.data;
+        const targetRoles = dto.roles || [];
+
+        if (savedUser.id) {
+          this.syncRoles(savedUser.id, targetRoles, () => {
+            this.confirmModalTitle = 'Éxito';
+            this.confirmModalMessage = this.editingUser ? 'Usuario editado correctamente' : 'Usuario creado correctamente';
+            this.confirmModalType = 'success';
+            this.confirmModalButtonText = 'Aceptar';
+            this.pendingAction = () => {
+              this.showUserForm = false;
+              this.loadUsers();
+            };
+            this.showConfirmModal = true;
+          });
+        }
+      },
+      error: (err) => {
+        console.error('Error saving user', err);
+        // Handle error (maybe show alert)
+      }
+    });
+  }
+
+  syncRoles(userId: string, targetRoleIds: number[], onComplete: () => void): void {
+    this.usuarioService.buscarPorId(userId).subscribe(res => {
+      const currentUser = res.data;
+      const currentRoleIds = new Set(currentUser.roles.map(r => r.id));
+      const targetIds = new Set(targetRoleIds);
+
+      const rolesToAdd = targetRoleIds.filter(id => !currentRoleIds.has(id));
+      const rolesToRemove = Array.from(currentRoleIds).filter(id => !targetIds.has(id));
+
+      // Create observable chain or Promise.all
+      // Using concise Promise-based approach for parallel requests
+      const promises: Promise<any>[] = [];
+
+      rolesToAdd.forEach(id => {
+        promises.push(new Promise((resolve) => {
+          this.usuarioService.asignarRol(userId, id).subscribe({
+            next: resolve,
+            error: (e) => {
+              console.error('Error adding role', id, e);
+              resolve(null); // Continue anyway
+            }
+          });
+        }));
+      });
+
+      rolesToRemove.forEach(id => {
+        promises.push(new Promise((resolve) => {
+          this.usuarioService.removerRol(userId, id).subscribe({
+            next: resolve,
+            error: (e) => {
+              console.error('Error removing role', id, e);
+              resolve(null);
+            }
+          });
+        }));
+      });
+
+      if (promises.length > 0) {
+        Promise.all(promises).then(() => onComplete());
+      } else {
+        onComplete();
+      }
     });
   }
 
