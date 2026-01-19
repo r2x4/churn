@@ -216,6 +216,13 @@ export class ApiService {
         { category: 'Contract', value: 'Two year', churnCount: 48, totalCount: 1695, churnRate: 2.8 }
       ];
     }
+    if (category === 'InternetService') {
+      return [
+        { category: 'InternetService', value: 'Fiber optic', churnCount: 1297, totalCount: 3096, churnRate: 41.9 },
+        { category: 'InternetService', value: 'DSL', churnCount: 459, totalCount: 2421, churnRate: 19.0 },
+        { category: 'InternetService', value: 'No Internet', churnCount: 113, totalCount: 1526, churnRate: 7.4 }
+      ];
+    }
     return [];
   }
 

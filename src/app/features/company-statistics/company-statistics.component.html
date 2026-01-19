@@ -19,4 +19,12 @@
       <p class="text-3xl font-bold text-yellow-500">{{ stats.churnRate | number:'1.1-2' }}%</p>
     </div>
   </div>
+
+  <!-- Chart: Ingresos vs. Pérdidas -->
+  <div class="mt-8 bg-white rounded-lg shadow p-6">
+    <h3 class="text-lg font-semibold text-gray-800 mb-4">Ingresos vs. Pérdidas Estimadas</h3>
+    <div class="relative h-96">
+      <canvas id="revenueLossChart"></canvas>
+    </div>
+  </div>
 </div>

@@ -1,7 +1,7 @@
 <div class="p-4 sm:p-6 lg:p-8 bg-gray-100 min-h-screen">
   <h1 class="text-3xl font-bold text-gray-800 mb-6">Telecom Dashboard 📊</h1>
 
-  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
     <!-- KPI Card: Total Customers -->
     <div *ngIf="companyStatistics" class="bg-white rounded-lg shadow-md p-6 flex items-center justify-between">
       <div>
@@ -30,7 +30,7 @@
     </div>
 
     <!-- Chart: Churn by Contract Type -->
-    <div class="bg-white rounded-lg shadow-md p-6 lg:col-span-2">
+    <div class="bg-white rounded-lg shadow-md p-6">
       <h3 class="text-lg font-semibold text-gray-800 mb-4">Churn by Contract Type</h3>
       <div class="relative h-64">
         <canvas id="churnByContractChart"></canvas>
@@ -46,10 +46,18 @@
     </div>
 
     <!-- Chart: Churn by Internet Service -->
-    <div class="bg-white rounded-lg shadow-md p-6">
+    <div class="bg-white rounded-lg shadow-md p-6 md:col-span-2">
       <h3 class="text-lg font-semibold text-gray-800 mb-4">Churn by Internet Service</h3>
-      <div class="relative h-64">
+      <div class="relative h-96">
         <canvas id="churnByInternetServiceChart"></canvas>
+      </div>
+    </div>
+
+    <!-- Placeholder Chart: Churn by Payment Method -->
+    <div class="bg-white rounded-lg shadow-md p-6 md:col-span-2">
+      <h3 class="text-lg font-semibold text-gray-800 mb-4">Churn by Payment Method</h3>
+      <div class="relative h-64">
+        <canvas id="churnByPaymentMethodChart"></canvas>
       </div>
     </div>
   </div>
