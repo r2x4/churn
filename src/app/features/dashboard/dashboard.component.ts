@@ -18,7 +18,7 @@ export class DashboardComponent implements OnInit, AfterViewInit {
   churnByContract: ChurnByCategory[] = [];
   monthlyRevenue: RevenueStats[] = [];
   churnByInternetService: ChurnByCategory[] = [];
-  churnByPaymentMethod: ChurnByCategory[] = [];
+  churnByGender: ChurnByCategory[] = [];
 
   constructor(private apiService: ApiService) {}
 
@@ -42,10 +42,9 @@ export class DashboardComponent implements OnInit, AfterViewInit {
       this.createChurnByInternetServiceChart();
     });
 
-    this.apiService.getChurnByCategory('PaymentMethod').subscribe(data => {
-      this.churnByPaymentMethod = data;
-      console.log('Churn By Payment Method Data:', this.churnByPaymentMethod); // Debug log
-      this.createChurnByPaymentMethodChart();
+    this.apiService.getChurnByCategory('gender').subscribe(data => {
+      this.churnByGender = data;
+      this.createChurnByGenderChart();
     });
   }
 
@@ -227,42 +226,32 @@ export class DashboardComponent implements OnInit, AfterViewInit {
     }
   }
 
-  createChurnByPaymentMethodChart(): void {
-    const canvas = document.getElementById('churnByPaymentMethodChart') as HTMLCanvasElement;
+  createChurnByGenderChart(): void {
+    const canvas = document.getElementById('churnByPaymentMethodChart') as HTMLCanvasElement; // Keep same canvas ID for now
     if (!canvas) {
-      console.error('Canvas element with ID "churnByPaymentMethodChart" not found.'); // Debug log
+      console.error('Canvas element with ID "churnByPaymentMethodChart" not found.');
       return;
     }
 
     const ctx = canvas.getContext('2d');
     if (ctx) {
-      const labels = this.churnByPaymentMethod.map(item => item.value);
-      const churnData = this.churnByPaymentMethod.map(item => item.churnRate);
-      console.log('Labels for Churn By Payment Method:', labels); // Debug log
-      console.log('Churn Data for Churn By Payment Method:', churnData); // Debug log
+      const labels = this.churnByGender.map(item => item.value);
+      const churnData = this.churnByGender.map(item => item.churnRate);
 
       new Chart(ctx, {
-        type: 'bar',
+        type: 'bar', // Using bar chart for gender comparison
         data: {
           labels: labels,
           datasets: [{
             label: 'Churn Rate (%)',
             data: churnData,
             backgroundColor: [
-              'rgba(255, 99, 132, 0.6)',
-              'rgba(54, 162, 235, 0.6)',
-              'rgba(255, 206, 86, 0.6)',
-              'rgba(75, 192, 192, 0.6)',
-              'rgba(153, 102, 255, 0.6)',
-              'rgba(255, 159, 64, 0.6)'
+              'rgba(54, 162, 235, 0.6)', // Blue for Male
+              'rgba(255, 99, 132, 0.6)'  // Red for Female
             ],
             borderColor: [
-              'rgba(255, 99, 132, 1)',
               'rgba(54, 162, 235, 1)',
-              'rgba(255, 206, 86, 1)',
-              'rgba(75, 192, 192, 1)',
-              'rgba(153, 102, 255, 1)',
-              'rgba(255, 159, 64, 1)'
+              'rgba(255, 99, 132, 1)'
             ],
             borderWidth: 1
           }]
@@ -285,7 +274,7 @@ export class DashboardComponent implements OnInit, AfterViewInit {
             },
             title: {
               display: true,
-              text: 'Churn Rate by Payment Method'
+              text: 'Churn Rate by Gender'
             }
           }
         }

@@ -223,6 +223,12 @@ export class ApiService {
         { category: 'InternetService', value: 'No Internet', churnCount: 113, totalCount: 1526, churnRate: 7.4 }
       ];
     }
+    if (category === 'gender') {
+      return [
+        { category: 'Gender', value: 'Masculino', churnCount: 930, totalCount: 3555, churnRate: 26.16 },
+        { category: 'Gender', value: 'Femenino', churnCount: 939, totalCount: 3488, churnRate: 26.92 }
+      ];
+    }
     return [];
   }
 
