@@ -44,6 +44,7 @@ export class DashboardComponent implements OnInit, AfterViewInit {
 
     this.apiService.getChurnByCategory('PaymentMethod').subscribe(data => {
       this.churnByPaymentMethod = data;
+      console.log('Churn By Payment Method Data:', this.churnByPaymentMethod); // Debug log
       this.createChurnByPaymentMethodChart();
     });
   }
@@ -228,12 +229,17 @@ export class DashboardComponent implements OnInit, AfterViewInit {
 
   createChurnByPaymentMethodChart(): void {
     const canvas = document.getElementById('churnByPaymentMethodChart') as HTMLCanvasElement;
-    if (!canvas) return;
+    if (!canvas) {
+      console.error('Canvas element with ID "churnByPaymentMethodChart" not found.'); // Debug log
+      return;
+    }
 
     const ctx = canvas.getContext('2d');
     if (ctx) {
       const labels = this.churnByPaymentMethod.map(item => item.value);
       const churnData = this.churnByPaymentMethod.map(item => item.churnRate);
+      console.log('Labels for Churn By Payment Method:', labels); // Debug log
+      console.log('Churn Data for Churn By Payment Method:', churnData); // Debug log
 
       new Chart(ctx, {
         type: 'bar',
