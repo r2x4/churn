@@ -10,74 +10,65 @@ import { PermisoService } from '../../../../core/services/permiso.service';
     standalone: true,
     imports: [CommonModule, ReactiveFormsModule],
     template: `
-    <div class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50 flex items-center justify-center">
-      <div class="relative p-8 border w-full max-w-2xl shadow-2xl rounded-xl bg-white transform transition-all">
+    <div class="fixed inset-0 bg-gray-900 bg-opacity-50 flex items-center justify-center z-50 p-4 backdrop-blur-sm">
+      <div class="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
         <!-- Header -->
-        <div class="mb-6 pb-4 border-b border-gray-100 dark:border-gray-700">
-          <h3 class="text-2xl font-bold text-gray-800 dark:text-gray-100">
-            {{ role ? 'Editar Rol' : 'Nuevo Rol' }}
-          </h3>
-          <p class="text-sm text-gray-500 mt-1">Gestiona los detalles y permisos del rol</p>
+        <div class="bg-indigo-600 px-6 py-4 text-white flex justify-between items-center sticky top-0 z-10">
+          <h3 class="text-xl font-bold">{{ role ? 'Editar Rol' : 'Nuevo Rol' }}</h3>
+          <button (click)="onCancel.emit()" class="text-white hover:text-gray-200 transition-colors text-2xl font-light">&times;</button>
         </div>
 
-        <form [formGroup]="roleForm" (ngSubmit)="onSubmit()">
-          <!-- Nombre y Descripción -->
-          <div class="grid grid-cols-1 gap-6 mb-6">
+        <form [formGroup]="roleForm" (ngSubmit)="onSubmit()" class="p-8 space-y-8 flex-1 overflow-y-auto custom-scrollbar">
+          <!-- Basic Information -->
+          <div class="space-y-4">
+            <h4 class="text-sm font-bold text-gray-800 uppercase tracking-wide text-indigo-600">📋 Información del Rol</h4>
             <div>
-              <label class="block text-sm font-medium text-gray-700 mb-2">Nombre del Rol</label>
-              <input type="text" formControlName="nombre"
-                class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all outline-none"
-                placeholder="Ej: ADMIN_VENTAS">
-              <div *ngIf="roleForm.get('nombre')?.touched && roleForm.get('nombre')?.invalid" class="text-red-500 text-xs mt-1">
-                El nombre es requerido
-              </div>
+              <label class="block text-sm font-semibold text-gray-700 mb-2">Nombre del Rol</label>
+              <input type="text" formControlName="nombre" placeholder="Ej: ADMIN_VENTAS"
+                     class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition-all">
+              <div *ngIf="roleForm.get('nombre')?.touched && roleForm.get('nombre')?.invalid" class="text-red-500 text-xs mt-2">El nombre es requerido</div>
             </div>
             <div>
-              <label class="block text-sm font-medium text-gray-700 mb-2">Descripción</label>
-              <textarea formControlName="descripcion" rows="3"
-                class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all outline-none"
-                placeholder="Describe las responsabilidades de este rol..."></textarea>
+              <label class="block text-sm font-semibold text-gray-700 mb-2">Descripción</label>
+              <textarea formControlName="descripcion" rows="3" placeholder="Describe las responsabilidades y funciones de este rol..."
+                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition-all resize-none"></textarea>
             </div>
           </div>
 
-          <!-- Selección de Permisos -->
-          <div class="mb-8">
-            <div class="flex justify-between items-center mb-4">
-              <label class="block text-sm font-medium text-gray-700">Permisos Asignados</label>
-              <span class="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded-full">{{ getSelectedPermissionsCount() }} seleccionados</span>
+          <!-- Permissions Selection -->
+          <div class="space-y-4 border-t border-gray-200 pt-8">
+            <div class="flex justify-between items-center">
+              <h4 class="text-sm font-bold text-gray-800 uppercase tracking-wide text-indigo-600">🔑 Permisos Asignados</h4>
+              <span class="text-xs font-semibold text-indigo-600 bg-indigo-50 px-3 py-1 rounded-full">{{ getSelectedPermissionsCount() }} / {{ permisos.length }}</span>
             </div>
-            <div class="bg-gray-50 p-4 rounded-lg border border-gray-200 h-60 overflow-y-auto custom-scrollbar">
-              <div *ngIf="loadingPermisos" class="flex justify-center items-center h-full text-gray-400">
-                <i class="fas fa-spinner fa-spin mr-2"></i> Cargando permisos...
+            <div class="bg-gray-50 p-4 rounded-lg border border-gray-200 h-64 overflow-y-auto custom-scrollbar">
+              <div *ngIf="loadingPermisos" class="flex justify-center items-center h-full text-gray-500">
+                Cargando permisos...
               </div>
               
-              <div *ngIf="!loadingPermisos" class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <div *ngFor="let permiso of permisos" 
-                  class="flex items-start p-3 rounded-md transition-colors cursor-pointer hover:bg-white hover:shadow-sm border border-transparent hover:border-gray-200"
-                  (click)="togglePermiso(permiso.id)">
-                  <div class="flex items-center h-5">
-                    <input type="checkbox" [checked]="isPermisoSelected(permiso.id)"
-                      class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded cursor-pointer pointer-events-none">
+              <div *ngIf="!loadingPermisos" class="grid grid-cols-1 gap-3">
+                <label *ngFor="let permiso of permisos" 
+                       class="flex items-start p-4 bg-white rounded-lg cursor-pointer hover:shadow-sm transition border border-transparent hover:border-indigo-200">
+                  <input type="checkbox" [checked]="isPermisoSelected(permiso.id)"
+                         (change)="togglePermiso(permiso.id)"
+                         class="h-5 w-5 text-indigo-600 rounded cursor-pointer mt-0.5" />
+                  <div class="ml-3 text-sm flex-1">
+                    <span class="font-semibold text-gray-800">{{ permiso.nombre }}</span>
+                    <p class="text-gray-500 text-xs mt-1">{{ permiso.descripcion || 'Sin descripción' }}</p>
                   </div>
-                  <div class="ml-3 text-sm select-none">
-                    <label class="font-medium text-gray-700 cursor-pointer">{{ permiso.nombre }}</label>
-                    <p class="text-gray-500 text-xs mt-0.5">{{ permiso.descripcion || 'Sin descripción' }}</p>
-                  </div>
-                </div>
+                </label>
               </div>
             </div>
           </div>
 
-          <!-- Actions -->
-          <div class="flex justify-end gap-3 pt-4 border-t border-gray-100">
-            <button type="button" (click)="onCancel.emit()"
-              class="px-6 py-2.5 rounded-lg text-gray-700 bg-gray-100 hover:bg-gray-200 font-medium transition-colors">
+          <!-- Action Buttons -->
+          <div class="flex justify-end space-x-3 pt-8 border-t border-gray-200 sticky bottom-0 bg-white">
+            <button type="button" (click)="onCancel.emit()" class="px-6 py-3 text-gray-700 hover:bg-gray-100 rounded-lg transition-colors font-semibold">
               Cancelar
             </button>
             <button type="submit" [disabled]="roleForm.invalid || submitting"
-              class="px-6 py-2.5 rounded-lg text-white bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 font-medium shadow-md hover:shadow-lg transform transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed flex items-center">
-              <i *ngIf="submitting" class="fas fa-spinner fa-spin mr-2"></i>
-              {{ role ? 'Actualizar Rol' : 'Crear Rol' }}
+                    class="px-8 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition shadow-md hover:shadow-lg disabled:bg-gray-400 disabled:cursor-not-allowed font-bold flex items-center">
+              {{ role ? '✓ Actualizar Rol' : '+ Crear Rol' }}
             </button>
           </div>
         </form>

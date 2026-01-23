@@ -1,160 +1,134 @@
-<div class="p-4">
-  <h1 class="text-2xl font-bold mb-4">Panel de Administración</h1>
+<div class="p-4 bg-gray-50 min-h-screen">
+  <h1 class="text-2xl font-bold mb-4 text-gray-800">Panel de Administración</h1>
 
-  <div class="border-b border-gray-200">
-    <nav class="-mb-px flex space-x-8" aria-label="Tabs">
-      <button (click)="selectTab('predictions')"
-        [ngClass]="{'border-indigo-500 text-indigo-600': selectedTab === 'predictions', 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300': selectedTab !== 'predictions'}"
-        class="whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm">
-        Predicciones
+  <div class="border-b border-gray-200 mb-6 bg-white rounded-t-lg shadow-sm">
+    <nav class="-mb-px flex space-x-8 px-4 overflow-x-auto" aria-label="Tabs">
+      <button (click)="selectTab('churn')"
+        [ngClass]="{'border-indigo-500 text-indigo-600': selectedTab === 'churn', 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300': selectedTab !== 'churn'}"
+        class="whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm transition-all">
+        🎯 Predicción de Churn
       </button>
       <button (click)="selectTab('history')"
         [ngClass]="{'border-indigo-500 text-indigo-600': selectedTab === 'history', 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300': selectedTab !== 'history'}"
-        class="whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm">
-        Historial de Datos
+        class="whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm transition-all">
+        📊 Historial de Datos
       </button>
       <button (click)="selectTab('users')"
         [ngClass]="{'border-indigo-500 text-indigo-600': selectedTab === 'users', 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300': selectedTab !== 'users'}"
-        class="whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm">
-        Gestión de Usuarios
+        class="whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm transition-all">
+        👥 Gestión de Usuarios
       </button>
       <button (click)="selectTab('roles')"
         [ngClass]="{'border-indigo-500 text-indigo-600': selectedTab === 'roles', 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300': selectedTab !== 'roles'}"
-        class="whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm">
-        Roles y Permisos
+        class="whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm transition-all">
+        🔐 Roles y Permisos
+      </button>
+      <button (click)="selectTab('planes')"
+        [ngClass]="{'border-indigo-500 text-indigo-600': selectedTab === 'planes', 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300': selectedTab !== 'planes'}"
+        class="whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm transition-all">
+        📱 Planes
+      </button>
+      <button (click)="selectTab('ofertas')"
+        [ngClass]="{'border-indigo-500 text-indigo-600': selectedTab === 'ofertas', 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300': selectedTab !== 'ofertas'}"
+        class="whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm transition-all">
+        🎁 Ofertas
       </button>
     </nav>
   </div>
 
   <div class="mt-4">
-    <div *ngIf="selectedTab === 'predictions'">
-      <!-- ... (se mantiene igual) ... -->
-      <h2 class="text-xl font-semibold mb-2">Sección de Predicciones</h2>
-      <p>Gestionaremos los modelos de predicción, ver logs y reportes.</p>
 
-      <h3 class="text-lg font-semibold mt-4">Probar Predicción</h3>
-      <p class="mb-2">Datos de cliente de ejemplo para enviar a la API:</p>
-      <pre class="bg-gray-100 p-3 rounded-md text-sm overflow-auto mb-4">{{ sampleCustomerInput | json }}</pre>
-
-      <button (click)="makePrediction()"
-        class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">
-        Realizar Predicción
-      </button>
-
-      <div *ngIf="predictionResult" class="mt-4 p-3 bg-green-100 border border-green-400 text-green-700 rounded-md">
-        <h4 class="font-bold">Resultado de la Predicción:</h4>
-        <pre>{{ predictionResult | json }}</pre>
-      </div>
-
-      <div *ngIf="predictionError" class="mt-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded-md">
-        <h4 class="font-bold">Error:</h4>
-        <p>{{ predictionError }}</p>
-      </div>
+    <!-- Pestaña de Predicción de Churn -->
+    <div *ngIf="selectedTab === 'churn'">
+      <app-churn-prediction></app-churn-prediction>
     </div>
 
-    <!-- Nueva pestaña de Historial Componentizada -->
+    <!-- Pestaña de Historial -->
     <div *ngIf="selectedTab === 'history'">
+      <!-- ... existing history content ... -->
       <div class="flex justify-between items-center mb-4">
-        <div>
-          <h2 class="text-xl font-semibold">Gestión de Historial</h2>
-          <p class="text-sm text-gray-500">Administración de predicciones y logs de sistema.</p>
-        </div>
+        <h2 class="text-xl font-semibold">Gestión de Historial</h2>
         <div class="flex space-x-2">
           <button (click)="openCreateForm()"
-            class="bg-green-600 hover:bg-green-700 text-white text-sm py-2 px-3 rounded shadow">
-            ➕ Nuevo Registro
-          </button>
+            class="bg-green-600 hover:bg-green-700 text-white text-sm py-2 px-3 rounded shadow">➕ Nuevo
+            Registro</button>
           <button (click)="toggleDeleted()"
-            class="bg-gray-600 hover:bg-gray-700 text-white text-sm py-2 px-3 rounded shadow">
-            {{ viewingDeleted ? '📂 Ver Activos' : '🗑️ Ver Eliminados' }}
-          </button>
+            class="bg-gray-600 hover:bg-gray-700 text-white text-sm py-2 px-3 rounded shadow">{{ viewingDeleted ? '📂
+            Ver Activos' : '🗑️ Ver Eliminados' }}</button>
           <button (click)="loadHistory()"
-            class="bg-indigo-600 hover:bg-indigo-700 text-white text-sm py-2 px-3 rounded shadow">
-            🔄 Refrescar
-          </button>
+            class="bg-indigo-600 hover:bg-indigo-700 text-white text-sm py-2 px-3 rounded shadow">🔄 Refrescar</button>
         </div>
       </div>
-
-      <div *ngIf="isLoadingHistory" class="text-center py-10">
-        <p class="text-gray-500 italic">Consultando al backend...</p>
-      </div>
-
-      <div *ngIf="!isLoadingHistory && historyList.length === 0" class="bg-yellow-50 p-6 rounded-md text-center">
-        <p class="text-yellow-700">No hay registros en la lista de {{ viewingDeleted ? 'eliminados' : 'activos' }}.</p>
-      </div>
-
-      <!-- Componente Tabla -->
-      <app-historial-table *ngIf="!isLoadingHistory && historyList.length > 0" [historyList]="historyList"
-        [isDeletedView]="viewingDeleted" (onView)="viewHistoryDetail($event)" (onEdit)="openEditForm($event)"
-        (onDelete)="deleteHistory($event)">
-      </app-historial-table>
-
-      <!-- Componente Detalle (Modal) -->
-      <app-historial-detail-modal *ngIf="showDetail" [item]="selectedHistory" (onClose)="closeDetail()">
-      </app-historial-detail-modal>
-
-      <!-- Componente Formulario (Modal) -->
+      <app-historial-table [historyList]="historyList" [isDeletedView]="viewingDeleted"
+        (onView)="viewHistoryDetail($event)" (onEdit)="openEditForm($event)"
+        (onDelete)="deleteHistory($event)"></app-historial-table>
+      <app-historial-detail-modal *ngIf="showDetail" [item]="selectedHistory"
+        (onClose)="closeDetail()"></app-historial-detail-modal>
       <app-historial-form *ngIf="showForm" [editingItem]="editingHistory" (onSave)="saveHistory($event)"
-        (onCancel)="showForm = false">
-      </app-historial-form>
+        (onCancel)="showForm = false"></app-historial-form>
     </div>
 
+    <!-- Pestaña de Usuarios -->
     <div *ngIf="selectedTab === 'users'">
       <div class="flex justify-between items-center mb-4">
-        <div>
-          <h2 class="text-xl font-semibold">Gestión de Usuarios</h2>
-          <p class="text-sm text-gray-500">Administra los usuarios y sus roles en el sistema.</p>
-        </div>
+        <h2 class="text-xl font-semibold">Gestión de Usuarios</h2>
         <div class="flex space-x-2">
           <button (click)="openCreateUserForm()"
-            class="bg-green-600 hover:bg-green-700 text-white text-sm py-2 px-3 rounded shadow">
-            ➕ Nuevo Usuario
-          </button>
+            class="bg-green-600 hover:bg-green-700 text-white text-sm py-2 px-3 rounded shadow">➕ Nuevo Usuario</button>
           <button (click)="toggleDeletedUsers()"
-            class="bg-gray-600 hover:bg-gray-700 text-white text-sm py-2 px-3 rounded shadow">
-            {{ viewingDeletedUsers ? '📂 Ver Activos' : '🗑️ Ver Eliminados' }}
-          </button>
+            class="bg-gray-600 hover:bg-gray-700 text-white text-sm py-2 px-3 rounded shadow">{{ viewingDeletedUsers ?
+            '📂 Ver Activos' : '🗑️ Ver Eliminados' }}</button>
           <button (click)="loadUsers()"
-            class="bg-indigo-600 hover:bg-indigo-700 text-white text-sm py-2 px-3 rounded shadow">
-            🔄 Refrescar
-          </button>
+            class="bg-indigo-600 hover:bg-indigo-700 text-white text-sm py-2 px-3 rounded shadow">🔄 Refrescar</button>
         </div>
       </div>
-
-      <div *ngIf="isLoadingUsers" class="text-center py-10">
-        <p class="text-gray-500 italic">Cargando usuarios...</p>
-      </div>
-
-      <div *ngIf="!isLoadingUsers && userList.length === 0" class="bg-yellow-50 p-6 rounded-md text-center">
-        <p class="text-yellow-700">No hay usuarios en la lista de {{ viewingDeletedUsers ? 'eliminados' : 'activos' }}.
-        </p>
-      </div>
-
-      <!-- Componente Tabla de Usuarios -->
-      <app-usuario-table *ngIf="!isLoadingUsers && userList.length > 0" [userList]="userList"
-        [isDeletedView]="viewingDeletedUsers" (onView)="viewUserDetail($event)" (onEdit)="openEditUserForm($event)"
-        (onDelete)="deleteUser($event)">
-      </app-usuario-table>
-
-      <!-- Modal de Detalle de Usuario -->
-      <app-usuario-detail-modal *ngIf="showUserDetail" [user]="selectedUser" (onClose)="showUserDetail = false">
-      </app-usuario-detail-modal>
-
-      <!-- Formulario de Usuario -->
+      <app-usuario-table [userList]="userList" [isDeletedView]="viewingDeletedUsers" (onView)="viewUserDetail($event)"
+        (onEdit)="openEditUserForm($event)" (onDelete)="deleteUser($event)"></app-usuario-table>
+      <app-usuario-detail-modal *ngIf="showUserDetail" [user]="selectedUser"
+        (onClose)="showUserDetail = false"></app-usuario-detail-modal>
       <app-usuario-form *ngIf="showUserForm" [editingUser]="editingUser" (onSave)="saveUser($event)"
-        (onCancel)="showUserForm = false">
-      </app-usuario-form>
-
-      <!-- Modal de Confirmación -->
-      <app-confirm-modal *ngIf="showConfirmModal" [title]="confirmModalTitle" [message]="confirmModalMessage"
-        [confirmText]="confirmModalButtonText" [type]="confirmModalType" (onConfirm)="executePendingAction()"
-        (onCancel)="cancelPendingAction()">
-      </app-confirm-modal>
+        (onCancel)="showUserForm = false"></app-usuario-form>
     </div>
 
-    <!-- Pestaña de Roles y Permisos -->
+    <!-- Pestaña de Roles -->
     <div *ngIf="selectedTab === 'roles'">
       <app-roles-list></app-roles-list>
     </div>
+
+    <!-- Pestaña de Planes -->
+    <div *ngIf="selectedTab === 'planes'">
+      <div class="flex justify-between items-center mb-6">
+        <h2 class="text-xl font-semibold text-gray-800">Gestión de Planes</h2>
+        <button (click)="openCreatePlanForm()"
+          class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg shadow-md transition-all flex items-center gap-2">
+          <i class="fas fa-plus"></i> Nuevo Plan
+        </button>
+      </div>
+      <app-plan-table [planList]="planList" (onEdit)="openEditPlanForm($event)"
+        (onDelete)="deletePlan($event)"></app-plan-table>
+      <app-plan-form *ngIf="showPlanForm" [editingItem]="selectedPlan" (onSave)="savePlan($event)"
+        (onCancel)="showPlanForm = false"></app-plan-form>
+    </div>
+
+    <!-- Pestaña de Ofertas -->
+    <div *ngIf="selectedTab === 'ofertas'">
+      <div class="flex justify-between items-center mb-6">
+        <h2 class="text-xl font-semibold text-gray-800">Gestión de Ofertas</h2>
+        <button (click)="openCreateOfertaForm()"
+          class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg shadow-md transition-all flex items-center gap-2">
+          <i class="fas fa-plus"></i> Nueva Oferta
+        </button>
+      </div>
+      <app-oferta-table [ofertaList]="ofertaList" (onEdit)="openEditOfertaForm($event)"
+        (onDelete)="deleteOferta($event)"></app-oferta-table>
+      <app-oferta-form *ngIf="showOfertaForm" [editingItem]="selectedOferta" (onSave)="saveOferta($event)"
+        (onCancel)="showOfertaForm = false"></app-oferta-form>
+    </div>
   </div>
+
+  <!-- Modal de Confirmación Global -->
+  <app-confirm-modal *ngIf="showConfirmModal" [title]="confirmModalTitle" [message]="confirmModalMessage"
+    [confirmText]="confirmModalButtonText" [type]="confirmModalType" (onConfirm)="executePendingAction()"
+    (onCancel)="cancelPendingAction()">
+  </app-confirm-modal>
 </div>

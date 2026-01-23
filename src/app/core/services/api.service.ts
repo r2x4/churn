@@ -19,6 +19,13 @@ type LoginRequest = {
   password: string;
 };
 
+type LoginApiResponse = {
+  username: string;
+  message: string;
+  jwt: string;
+  status: boolean;
+};
+
 type ApiResponse<T> = {
   time: string;
   message: string;
@@ -32,7 +39,7 @@ type ApiResponse<T> = {
 export class ApiService {
   private apiUrl = environment.apiBaseUrl;
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient) { }
 
   private getHeaders(): HttpHeaders {
     return new HttpHeaders({
@@ -53,6 +60,59 @@ export class ApiService {
         console.error('Error en predicción:', error);
         // Datos mock para desarrollo
         return of(this.getMockChurnPrediction(data));
+      })
+    );
+  }
+
+  // Evaluar churn para un usuario específico
+  evaluarChurnPorUsuario(usuarioId: string): Observable<any> {
+    return this.http.post<any>(
+      `${this.apiUrl}/predicciones/evaluar/${usuarioId}`,
+      {},
+      { headers: this.getHeaders() }
+    ).pipe(
+      catchError(error => {
+        console.error('Error evaluando churn:', error);
+        return throwError(() => new Error('Error al evaluar predicción de churn'));
+      })
+    );
+  }
+
+  // Obtener lista de predicciones
+  obtenerPredicciones(): Observable<any[]> {
+    return this.http.get<any[]>(
+      `${this.apiUrl}/predicciones`,
+      { headers: this.getHeaders() }
+    ).pipe(
+      catchError(error => {
+        console.error('Error obteniendo predicciones:', error);
+        return of([]);
+      })
+    );
+  }
+
+  // Obtener estadísticas de predicciones
+  obtenerEstadisticasPredicciones(): Observable<any> {
+    return this.http.get<any>(
+      `${this.apiUrl}/predicciones/estadisticas/conteo`,
+      { headers: this.getHeaders() }
+    ).pipe(
+      catchError(error => {
+        console.error('Error obteniendo estadísticas:', error);
+        return of({ totalEvaluados: 0, totalChurn: 0 });
+      })
+    );
+  }
+
+  // Obtener datos del modelo para predicción
+  obtenerModeloInsumos(idUsuario: string): Observable<any> {
+    return this.http.get<any>(
+      `${this.apiUrl}/modelo-insumos/${idUsuario}`,
+      { headers: this.getHeaders() }
+    ).pipe(
+      catchError(error => {
+        console.error('Error obteniendo datos del modelo:', error);
+        return of({ success: false, data: null });
       })
     );
   }
@@ -111,13 +171,13 @@ export class ApiService {
 
   login(credentials: LoginRequest): Observable<{ token: string }> {
     return this.http
-      .post<ApiResponse<string>>(`${environment.authBaseUrl}/login`, credentials, { headers: this.getHeaders() })
+      .post<LoginApiResponse>(`${environment.authBaseUrl}/login`, credentials, { headers: this.getHeaders() })
       .pipe(
         map((response) => {
-          if (!response?.success || !response.data) {
+          if (!response?.status || !response.jwt) {
             throw new Error(response?.message || 'Login inválido');
           }
-          return { token: response.data };
+          return { token: response.jwt };
         }),
         catchError((err: unknown) => {
           if (err instanceof HttpErrorResponse) {
