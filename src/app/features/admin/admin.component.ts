@@ -150,11 +150,11 @@ export class AdminComponent implements OnInit {
     this.loadHistory();
   }
 
-  viewHistoryDetail(id: number): void {
-    this.historialService.buscarPorId(id).subscribe(res => {
-      this.selectedHistory = res.data;
-      this.showDetail = true;
-    });
+  viewHistoryDetail(item: HistorialPrediccion): void {
+    // Usar directamente el objeto del historial para evitar problemas de sincronización
+    // y asegurar que se muestre el customerID correcto
+    this.selectedHistory = item;
+    this.showDetail = true;
   }
 
   closeDetail(): void {

@@ -54,7 +54,7 @@ import { HistorialPrediccion } from '../../../core/models/historial.model';
             <!-- Actions -->
             <td class="px-6 py-4">
               <div class="flex justify-center gap-2">
-                <button (click)="onView.emit(item.id)" 
+                <button (click)="onView.emit(item)" 
                         title="Ver Detalle"
                         class="inline-flex items-center justify-center w-10 h-10 rounded-full bg-blue-50 text-blue-600 hover:bg-blue-100 hover:shadow-md transition-all">
                   <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -94,7 +94,7 @@ export class HistorialTableComponent {
     @Input() historyList: HistorialPrediccion[] = [];
     @Input() isDeletedView: boolean = false;
 
-    @Output() onView = new EventEmitter<number>();
+    @Output() onView = new EventEmitter<HistorialPrediccion>();
     @Output() onEdit = new EventEmitter<HistorialPrediccion>();
     @Output() onDelete = new EventEmitter<number>();
 }

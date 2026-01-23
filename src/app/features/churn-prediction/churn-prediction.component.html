@@ -48,8 +48,12 @@
         </h2>
         <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
           <div class="bg-indigo-50 p-4 rounded-lg">
-            <p class="text-sm text-gray-600 font-semibold">ID</p>
+            <p class="text-sm text-gray-600 font-semibold">ID Usuario</p>
             <p class="text-lg font-bold text-gray-900">{{ selectedUsuario.id }}</p>
+          </div>
+          <div class="bg-indigo-50 p-4 rounded-lg" *ngIf="modeloInsumos?.idCliente">
+            <p class="text-sm text-gray-600 font-semibold">ID Cliente (Modelo)</p>
+            <p class="text-lg font-bold text-gray-900">{{ modeloInsumos?.idCliente }}</p>
           </div>
           <div class="bg-indigo-50 p-4 rounded-lg">
             <p class="text-sm text-gray-600 font-semibold">Nombre</p>
