@@ -9,6 +9,8 @@
  * - Los datos se mapean desde ModeloInsumoView (clase Java)
  * - La vista SQL combina datos de usuarios, servicios y planes
  * - Estos son los "ingredientes" que la IA necesita para hacer la predicción
+ * 
+ * NOTA: Unificado con tipos del backend para consistencia
  */
 export interface ModeloInsumos {
   // Identificación
@@ -16,9 +18,9 @@ export interface ModeloInsumos {
   idCliente: string;
   
   // Demográficos
-  /** Género: "Male" o "Female" */
+  /** Género: "Male" o "Female" (estandarizado en inglés) */
   gender: string;
-  /** Es adulto mayor: "Yes" o "No" */
+  /** Es adulto mayor: "Yes" o "No" (formato estándar del frontend) */
   seniorCitizen: string;
   /** Tiene cónyuge: "Yes" o "No" */
   partner: string;
@@ -62,6 +64,33 @@ export interface ModeloInsumos {
   monthlyCharges: number;
   /** Total acumulado histórico */
   totalCharges: number;
+}
+
+/**
+ * DTO para enviar datos personalizados al backend
+ * Coincide exactamente con PrediccionDatosPersonalizadosDTO del backend
+ */
+export interface PrediccionDatosPersonalizados {
+  id_cliente: string;
+  genero: string;
+  adulto_mayor: number;  // Diferente: número (0/1) en backend
+  tiene_pareja: string;
+  tiene_dependientes: string;
+  antiguedad_meses: number;
+  servicio_telefono: string;
+  lineas_multiples: string;
+  servicio_internet: string;
+  seguridad_en_linea: string;
+  respaldo_en_linea: string;
+  proteccion_dispositivo: string;
+  soporte_tecnico: string;
+  streaming_tv: string;
+  streaming_peliculas: string;
+  tipo_contrato: string;
+  facturacion_electronica: string;
+  metodo_pago: string;
+  cargo_mensual: number;
+  cargos_totales: number;
 }
 
 export interface ModeloInsumosResponse {

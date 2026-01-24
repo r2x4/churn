@@ -38,7 +38,7 @@ import { Plan } from '../../../../core/models/plan.model';
                 {{ plan.phoneService }}
               </span>
             </td>
-            <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+<td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
               <button (click)="onEdit.emit(plan)" title="Editar" aria-label="Editar" class="mr-3 w-9 h-9 flex items-center justify-center rounded-full bg-indigo-50 text-indigo-600 hover:bg-indigo-100 transition-all">
                 <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                   <path d="M12 20h9" />
@@ -63,6 +63,7 @@ import { Plan } from '../../../../core/models/plan.model';
 })
 export class PlanTableComponent {
     @Input() planList: Plan[] = [];
-    @Output() onEdit = new EventEmitter<Plan>();
+    
+@Output() onEdit = new EventEmitter<Plan>();
     @Output() onDelete = new EventEmitter<number>();
 }

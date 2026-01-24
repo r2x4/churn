@@ -7,7 +7,6 @@ import { HistorialService } from '../../core/services/historial.service';
 import { HistorialPrediccion, HistorialPrediccionDto } from '../../core/models/historial.model';
 import { HistorialTableComponent } from './components/historial-table.component';
 import { HistorialDetailModalComponent } from './components/historial-detail-modal.component';
-import { HistorialFormComponent } from './components/historial-form.component';
 import { UsuarioService } from '../../core/services/usuario.service';
 import { Usuario, UsuarioDto } from '../../core/models/usuario.model';
 import { UsuarioTableComponent } from './components/users/usuario-table.component';
@@ -29,12 +28,11 @@ import { ChurnPredictionComponent } from '../churn-prediction/churn-prediction.c
 @Component({
   selector: 'app-admin',
   standalone: true,
-  imports: [
+imports: [
     CommonModule,
     ReactiveFormsModule,
     HistorialTableComponent,
     HistorialDetailModalComponent,
-    HistorialFormComponent,
     UsuarioTableComponent,
     UsuarioDetailModalComponent,
     UsuarioFormComponent,
@@ -57,13 +55,11 @@ export class AdminComponent implements OnInit {
   isLoadingHistory: boolean = false;
   viewingDeleted: boolean = false;
 
-  // Variables para componentes Historial
+// Variables para componentes Historial
   selectedHistory: HistorialPrediccion | null = null;
-  editingHistory: HistorialPrediccion | null = null;
-  showForm: boolean = false;
   showDetail: boolean = false;
 
-  // Variables para componentes Usuarios
+// Variables para componentes Usuarios
   userList: Usuario[] = [];
   isLoadingUsers: boolean = false;
   viewingDeletedUsers: boolean = false;
@@ -80,13 +76,13 @@ export class AdminComponent implements OnInit {
   confirmModalButtonText: string = 'Confirmar';
   pendingAction: (() => void) | null = null;
 
-  // Variables para Planes
+// Variables para Planes
   planList: Plan[] = [];
   isLoadingPlanes = false;
   selectedPlan: any = null;
   showPlanForm = false;
 
-  // Variables para Ofertas
+// Variables para Ofertas
   ofertaList: Oferta[] = [];
   isLoadingOfertas = false;
   selectedOferta: Oferta | null = null;
@@ -157,38 +153,14 @@ export class AdminComponent implements OnInit {
     this.showDetail = true;
   }
 
-  closeDetail(): void {
+closeDetail(): void {
     this.showDetail = false;
     this.selectedHistory = null;
   }
 
-  openCreateForm(): void {
-    this.editingHistory = null;
-    this.showForm = true;
-  }
+  
 
-  openEditForm(item: HistorialPrediccion): void {
-    this.editingHistory = item;
-    this.showForm = true;
-  }
 
-  saveHistory(dto: HistorialPrediccionDto): void {
-    const request = this.editingHistory
-      ? this.historialService.editar(this.editingHistory.id, dto)
-      : this.historialService.crear(dto);
-
-    request.subscribe(() => {
-      this.confirmModalTitle = 'Éxito';
-      this.confirmModalMessage = this.editingHistory ? 'Registro editado correctamente' : 'Registro creado correctamente';
-      this.confirmModalType = 'success';
-      this.confirmModalButtonText = 'Aceptar';
-      this.pendingAction = () => {
-        this.showForm = false;
-        this.loadHistory();
-      };
-      this.showConfirmModal = true;
-    });
-  }
 
   // ================= USERS LOGIC =================
 
@@ -222,7 +194,7 @@ export class AdminComponent implements OnInit {
     this.loadUsers();
   }
 
-  viewUserDetail(id: string): void {
+viewUserDetail(id: string): void {
     this.usuarioService.buscarPorId(id).subscribe(res => {
       this.selectedUser = res.data;
       this.showUserDetail = true;
@@ -271,6 +243,8 @@ export class AdminComponent implements OnInit {
       }
     });
   }
+
+
 
   syncRoles(userId: string, targetRoleIds: number[], onComplete: () => void): void {
     this.usuarioService.buscarPorId(userId).subscribe(res => {
@@ -358,7 +332,7 @@ export class AdminComponent implements OnInit {
 
   // ================= PLANES LOGIC =================
 
-  loadPlanes(): void {
+loadPlanes(): void {
     this.isLoadingPlanes = true;
     this.planService.listar(0, 100).subscribe({
       next: (res) => {
@@ -420,6 +394,8 @@ export class AdminComponent implements OnInit {
     });
   }
 
+
+
   deletePlan(id: number): void {
     this.confirmModalTitle = 'Eliminar Plan';
     this.confirmModalMessage = '¿Estás seguro de que deseas eliminar este plan?';
@@ -435,7 +411,7 @@ export class AdminComponent implements OnInit {
 
   // ================= OFERTAS LOGIC =================
 
-  loadOfertas(): void {
+loadOfertas(): void {
     this.isLoadingOfertas = true;
     this.ofertaService.listar().subscribe({
       next: (res) => {
@@ -488,6 +464,8 @@ export class AdminComponent implements OnInit {
       }
     });
   }
+
+
 
   deleteOferta(id: number): void {
     this.confirmModalTitle = 'Eliminar Oferta';

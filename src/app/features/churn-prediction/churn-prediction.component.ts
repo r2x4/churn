@@ -6,7 +6,8 @@ import { ApiService } from '../../core/services/api.service';
 import { UsuarioService } from '../../core/services/usuario.service';
 import { CommonModule } from '@angular/common';
 import { Usuario } from '../../core/models/usuario.model';
-import { ModeloInsumos } from '../../core/models/modelo-insumos.model';
+import { ModeloInsumos, PrediccionDatosPersonalizados } from '../../core/models/modelo-insumos.model';
+import { DataTransformUtils } from '../../core/utils/data-transform.utils';
 
 @Component({
   selector: 'app-churn-prediction',
@@ -49,31 +50,31 @@ export class ChurnPredictionComponent implements OnInit {
     this.loadUsuarios();
   }
 
-  initForm(): void {
+initForm(): void {
     this.searchForm = this.fb.group({
       usuarioId: ['', Validators.required]
     });
 
     this.modeloForm = this.fb.group({
-      gender: ['', Validators.required],
-      seniorCitizen: ['', Validators.required],
-      partner: ['', Validators.required],
-      dependents: ['', Validators.required],
-      tenure: ['', [Validators.required, Validators.min(0)]],
-      phoneService: ['', Validators.required],
-      multipleLines: ['', Validators.required],
-      internetService: ['', Validators.required],
-      onlineSecurity: ['', Validators.required],
-      onlineBackup: ['', Validators.required],
-      deviceProtection: ['', Validators.required],
-      techSupport: ['', Validators.required],
-      streamingTV: ['', Validators.required],
-      streamingMovies: ['', Validators.required],
-      contract: ['', Validators.required],
-      paperlessBilling: ['', Validators.required],
-      paymentMethod: ['', Validators.required],
-      monthlyCharges: ['', [Validators.required, Validators.min(0)]],
-      totalCharges: ['', [Validators.required, Validators.min(0)]]
+      gender: ['', [Validators.required, this.validarGenero.bind(this)]],
+      seniorCitizen: ['', [Validators.required, this.validarYesNo.bind(this)]],
+      partner: ['', [Validators.required, this.validarYesNo.bind(this)]],
+      dependents: ['', [Validators.required, this.validarYesNo.bind(this)]],
+      tenure: ['', [Validators.required, Validators.min(0), Validators.max(600)]],
+      phoneService: ['', [Validators.required, this.validarYesNo.bind(this)]],
+      multipleLines: ['', [Validators.required, this.validarYesNo.bind(this)]],
+      internetService: ['', [Validators.required, this.validarInternetService.bind(this)]],
+      onlineSecurity: ['', [Validators.required, this.validarYesNo.bind(this)]],
+      onlineBackup: ['', [Validators.required, this.validarYesNo.bind(this)]],
+      deviceProtection: ['', [Validators.required, this.validarYesNo.bind(this)]],
+      techSupport: ['', [Validators.required, this.validarYesNo.bind(this)]],
+      streamingTV: ['', [Validators.required, this.validarYesNo.bind(this)]],
+      streamingMovies: ['', [Validators.required, this.validarYesNo.bind(this)]],
+      contract: ['', [Validators.required, this.validarContract.bind(this)]],
+      paperlessBilling: ['', [Validators.required, this.validarYesNo.bind(this)]],
+      paymentMethod: ['', [Validators.required, this.validarPaymentMethod.bind(this)]],
+      monthlyCharges: ['', [Validators.required, Validators.min(0), Validators.max(1000)]],
+      totalCharges: ['', [Validators.required, Validators.min(0), Validators.max(10000)]]
     });
   }
 
@@ -178,36 +179,20 @@ export class ChurnPredictionComponent implements OnInit {
     });
   }
 
-  /**
+/**
    * Transforma el género del formato del backend al formato del formulario
+   * @deprecated Usar DataTransformUtils.transformarGeneroBackendToFrontend()
    */
   private transformarGenero(genero: string | null | undefined): string {
-    if (!genero) return '';
-    
-    const generoLower = genero.toLowerCase().trim();
-    
-    // Mapear de español a inglés
-    if (generoLower === 'masculino' || generoLower === 'male' || generoLower === 'm') {
-      return 'Male';
-    }
-    if (generoLower === 'femenino' || generoLower === 'female' || generoLower === 'f') {
-      return 'Female';
-    }
-    
-    // Si ya está en el formato correcto, devolverlo
-    if (generoLower === 'male' || generoLower === 'female') {
-      return genero.charAt(0).toUpperCase() + genero.slice(1).toLowerCase();
-    }
-    
-    return '';
+    return DataTransformUtils.transformarGeneroBackendToFrontend(genero);
   }
 
   llenarFormularioModelo(datos: ModeloInsumos): void {
     console.log('Datos recibidos del modelo:', datos);
     console.log('Género recibido:', datos.gender);
     
-    this.modeloForm.patchValue({
-      gender: this.transformarGenero(datos.gender) || '',
+this.modeloForm.patchValue({
+      gender: DataTransformUtils.transformarGeneroBackendToFrontend(datos.gender),
       seniorCitizen: datos.seniorCitizen || '',
       partner: datos.partner || '',
       dependents: datos.dependents || '',
@@ -309,40 +294,68 @@ export class ChurnPredictionComponent implements OnInit {
       datosOriginales.totalCharges !== Number(datosEditados.totalCharges)
     );
 
-    console.log('📝 ¿Datos fueron editados?', datosFueronEditados);
-    if (datosFueronEditados) {
-      console.log('⚠️ ADVERTENCIA: Los datos fueron editados, pero el endpoint para datos personalizados no está disponible.');
-      console.log('ℹ️ Se usarán los datos originales de la base de datos para la predicción.');
-    }
+console.log('📝 ¿Datos fueron editados?', datosFueronEditados);
 
-    // Usar el endpoint estándar que funciona (según la documentación: POST /api/predicciones/evaluar/{idUsuario})
-    // Este endpoint obtiene los datos automáticamente desde la vista SQL
-    console.log('🚀 Enviando solicitud de predicción al endpoint estándar...');
-    console.log(`📤 ID Usuario: ${this.selectedUsuario.id}`);
-    console.log('ℹ️ El backend obtendrá los datos desde la vista SQL vw_insumos_modelo');
-    
-    this.apiService.evaluarChurnPorUsuario(this.selectedUsuario.id).subscribe({
-      next: (result) => {
-        console.log('✅ RESPUESTA DEL BACKEND:');
-        console.log('═══════════════════════════════════════════════════════════');
-        console.log(JSON.stringify(result, null, 2));
-        console.log('═══════════════════════════════════════════════════════════');
-        
-        this.predictionResult = result.data || result;
-        this.showResult = true;
-        this.isLoading = false;
-        
-        if (datosFueronEditados) {
-          this.searchError = '⚠️ Nota: Se usaron los datos originales de la BD para la predicción. Los cambios editados no se aplicaron porque el endpoint para datos personalizados no está disponible en el backend.';
+    if (datosFueronEditados) {
+      console.log('✅ Los datos fueron editados. Usando endpoint de datos personalizados...');
+      
+      // Transformar los datos del formulario al formato que espera el backend
+      const datosPersonalizados: PrediccionDatosPersonalizados = {
+        id_cliente: this.modeloInsumos?.idCliente || this.selectedUsuario.id,
+        genero: DataTransformUtils.transformarGeneroFrontendToBackend(datosEditados.gender),
+        adulto_mayor: DataTransformUtils.yesNoToNumber(datosEditados.seniorCitizen),
+        tiene_pareja: datosEditados.partner,
+        tiene_dependientes: datosEditados.dependents,
+        antiguedad_meses: Number(datosEditados.tenure),
+        servicio_telefono: datosEditados.phoneService,
+        lineas_multiples: datosEditados.multipleLines,
+        servicio_internet: datosEditados.internetService,
+        seguridad_en_linea: datosEditados.onlineSecurity,
+        respaldo_en_linea: datosEditados.onlineBackup,
+        proteccion_dispositivo: datosEditados.deviceProtection,
+        soporte_tecnico: datosEditados.techSupport,
+        streaming_tv: datosEditados.streamingTV,
+        streaming_peliculas: datosEditados.streamingMovies,
+        tipo_contrato: datosEditados.contract,
+        facturacion_electronica: datosEditados.paperlessBilling,
+        metodo_pago: datosEditados.paymentMethod,
+        cargo_mensual: Number(datosEditados.monthlyCharges),
+        cargos_totales: Number(datosEditados.totalCharges)
+      };
+
+      console.log('📦 DATOS TRANSFORMADOS (para endpoint personalizado):');
+      console.log('═════════════════════════════════════════════════════════');
+      console.log(JSON.stringify(datosPersonalizados, null, 2));
+      console.log('═════════════════════════════════════════════════════════');
+      
+      // Usar el nuevo endpoint para datos personalizados
+      this.apiService.predecirChurnConDatos(datosPersonalizados).subscribe({
+        next: (result) => {
+          console.log('✅ RESPUESTA DEL BACKEND (datos personalizados):');
+          console.log('═════════════════════════════════════════════════════════');
+          console.log(JSON.stringify(result, null, 2));
+          console.log('═════════════════════════════════════════════════════════');
+          
+          this.predictionResult = result.data || result;
+          this.showResult = true;
+          this.isLoading = false;
+          this.searchError = null; // Limpiar cualquier error anterior
+        },
+        error: (err) => {
+          console.error('❌ Error en predicción con datos personalizados:', err);
+          console.error('🔄 Intentando con endpoint estándar como fallback...');
+          
+          // Fallback al endpoint estándar si falla el personalizado
+          this.fallbackToStandardEndpoint();
         }
-      },
-      error: (err) => {
-        console.error('❌ Error en predicción:', err);
-        console.error('Detalles del error:', JSON.stringify(err, null, 2));
-        this.searchError = `Error al evaluar la predicción: ${err.message || 'Error desconocido'}. Intenta nuevamente.`;
-        this.isLoading = false;
-      }
-    });
+      });
+    } else {
+      console.log('🚀 No hay cambios. Usando endpoint estándar...');
+      console.log(`📤 ID Usuario: ${this.selectedUsuario.id}`);
+      console.log('ℹ️ El backend obtendrá los datos desde la vista SQL vw_insumos_modelo usando este ID');
+      
+      this.fallbackToStandardEndpoint();
+    }
   }
 
   resetForm(): void {
@@ -376,6 +389,111 @@ export class ChurnPredictionComponent implements OnInit {
     return this.predictionResult.churn || this.predictionResult.prevision === 'Churn' 
       ? '⚠️ Churn Detectado' 
       : '✅ No Churn';
+  }
+
+/**
+   * Método fallback al endpoint estándar cuando falla el personalizado
+   */
+  private fallbackToStandardEndpoint(): void {
+    this.apiService.evaluarChurnPorUsuario(this.selectedUsuario!.id).subscribe({
+      next: (result) => {
+        console.log('✅ RESPUESTA DEL BACKEND (fallback endpoint estándar):');
+        console.log('═════════════════════════════════════════════════════════');
+        console.log(JSON.stringify(result, null, 2));
+        console.log('═════════════════════════════════════════════════════════');
+        
+        this.predictionResult = result.data || result;
+        this.showResult = true;
+        this.isLoading = false;
+        this.searchError = null;
+      },
+      error: (err) => {
+        console.error('❌ Error en predicción (fallback):', err);
+        console.error('Detalles del error:', JSON.stringify(err, null, 2));
+        this.searchError = `Error al evaluar la predicción: ${err.message || 'Error desconocido'}. Intenta nuevamente.`;
+        this.isLoading = false;
+      }
+    });
+  }
+
+  // ================= VALIDACIONES PERSONALIZADAS =================
+
+  /**
+   * Validador personalizado para campo género
+   */
+  private validarGenero(control: any): { [key: string]: any } | null {
+    const value = control.value;
+    if (!value) return null;
+    
+    if (!DataTransformUtils.esGeneroValido(value)) {
+      return { generoInvalido: true };
+    }
+    
+    return null;
+  }
+
+  /**
+   * Validador personalizado para campos Yes/No
+   */
+  private validarYesNo(control: any): { [key: string]: any } | null {
+    const value = control.value;
+    if (!value) return null;
+    
+    if (!DataTransformUtils.esYesNoValido(value)) {
+      return { yesNoInvalido: true };
+    }
+    
+    return null;
+  }
+
+  /**
+   * Validador personalizado para servicio de internet
+   */
+  private validarInternetService(control: any): { [key: string]: any } | null {
+    const value = control.value;
+    if (!value) return null;
+    
+    const opcionesValidas = ['Fiber optic', 'DSL', 'No'];
+    if (!opcionesValidas.includes(value)) {
+      return { internetServiceInvalido: true };
+    }
+    
+    return null;
+  }
+
+  /**
+   * Validador personalizado para tipo de contrato
+   */
+  private validarContract(control: any): { [key: string]: any } | null {
+    const value = control.value;
+    if (!value) return null;
+    
+    const opcionesValidas = ['Month-to-month', 'One year', 'Two year'];
+    if (!opcionesValidas.includes(value)) {
+      return { contractInvalido: true };
+    }
+    
+    return null;
+  }
+
+  /**
+   * Validador personalizado para método de pago
+   */
+  private validarPaymentMethod(control: any): { [key: string]: any } | null {
+    const value = control.value;
+    if (!value) return null;
+    
+    const opcionesValidas = [
+      'Electronic check', 
+      'Mailed check', 
+      'Bank transfer (automatic)', 
+      'Credit card (automatic)'
+    ];
+    if (!opcionesValidas.includes(value)) {
+      return { paymentMethodInvalido: true };
+    }
+    
+    return null;
   }
 
   /**

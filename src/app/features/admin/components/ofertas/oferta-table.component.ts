@@ -41,7 +41,7 @@ import { Oferta } from '../../../../core/models/oferta.model';
                 No
               </span>
             </td>
-            <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+<td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
               <button (click)="onEdit.emit(oferta)" class="text-indigo-600 hover:text-indigo-900 mr-4 transition-colors">
                 <i class="fas fa-edit"></i>
               </button>
@@ -57,6 +57,7 @@ import { Oferta } from '../../../../core/models/oferta.model';
 })
 export class OfertaTableComponent {
     @Input() ofertaList: Oferta[] = [];
-    @Output() onEdit = new EventEmitter<Oferta>();
+    
+@Output() onEdit = new EventEmitter<Oferta>();
     @Output() onDelete = new EventEmitter<number>();
 }
