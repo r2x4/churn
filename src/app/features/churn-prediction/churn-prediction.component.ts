@@ -145,10 +145,25 @@ export class ChurnPredictionComponent implements OnInit {
 
     this.apiService.obtenerModeloInsumos(this.selectedUsuario.id).subscribe({
       next: (response) => {
-        console.log('Modelo insumos response:', response);
+        console.log('Modelo insumos response completa:', response);
         if (response.success && response.data) {
-          this.modeloInsumos = response.data;
-          this.llenarFormularioModelo(response.data);
+          const datosModelo = response.data;
+          console.log('Datos del modelo:', datosModelo);
+          console.log('Campo gender:', datosModelo.gender);
+          console.log('Campo genero (alternativo):', datosModelo.genero);
+          
+          // Si no viene gender pero viene genero, mapearlo
+          if (!datosModelo.gender && datosModelo.genero) {
+            datosModelo.gender = datosModelo.genero;
+          }
+          
+          // Si aún no hay gender, intentar obtenerlo del usuario seleccionado
+          if (!datosModelo.gender && this.selectedUsuario?.genero) {
+            datosModelo.gender = this.selectedUsuario.genero;
+          }
+          
+          this.modeloInsumos = datosModelo;
+          this.llenarFormularioModelo(datosModelo);
           this.showModeloForm = true;
         } else {
           this.searchError = 'No se pudieron obtener los datos del modelo.';
@@ -163,9 +178,36 @@ export class ChurnPredictionComponent implements OnInit {
     });
   }
 
+  /**
+   * Transforma el género del formato del backend al formato del formulario
+   */
+  private transformarGenero(genero: string | null | undefined): string {
+    if (!genero) return '';
+    
+    const generoLower = genero.toLowerCase().trim();
+    
+    // Mapear de español a inglés
+    if (generoLower === 'masculino' || generoLower === 'male' || generoLower === 'm') {
+      return 'Male';
+    }
+    if (generoLower === 'femenino' || generoLower === 'female' || generoLower === 'f') {
+      return 'Female';
+    }
+    
+    // Si ya está en el formato correcto, devolverlo
+    if (generoLower === 'male' || generoLower === 'female') {
+      return genero.charAt(0).toUpperCase() + genero.slice(1).toLowerCase();
+    }
+    
+    return '';
+  }
+
   llenarFormularioModelo(datos: ModeloInsumos): void {
+    console.log('Datos recibidos del modelo:', datos);
+    console.log('Género recibido:', datos.gender);
+    
     this.modeloForm.patchValue({
-      gender: datos.gender || '',
+      gender: this.transformarGenero(datos.gender) || '',
       seniorCitizen: datos.seniorCitizen || '',
       partner: datos.partner || '',
       dependents: datos.dependents || '',
@@ -185,6 +227,8 @@ export class ChurnPredictionComponent implements OnInit {
       monthlyCharges: datos.monthlyCharges || 0,
       totalCharges: datos.totalCharges || 0
     });
+    
+    console.log('Valor de gender en el formulario después de patchValue:', this.modeloForm.get('gender')?.value);
   }
 
   evaluarChurn(): void {
@@ -195,23 +239,107 @@ export class ChurnPredictionComponent implements OnInit {
 
     if (this.modeloForm.invalid) {
       this.searchError = 'Por favor completa todos los campos correctamente';
+      console.warn('⚠️ Formulario inválido. Errores:', this.getFormErrors());
       return;
     }
 
     this.isLoading = true;
     this.showResult = false;
     this.predictionResult = null;
+    this.searchError = null;
 
-    // Enviar los datos editados del formulario para la predicción
+    // Obtener los datos editados del formulario
+    const datosEditados = this.modeloForm.getRawValue();
+    console.log('═══════════════════════════════════════════════════════════');
+    console.log('📋 DATOS DEL FORMULARIO (antes de transformar):');
+    console.log('═══════════════════════════════════════════════════════════');
+    console.log(JSON.stringify(datosEditados, null, 2));
+    console.log('═══════════════════════════════════════════════════════════');
+
+    // Transformar los datos del formulario al formato que espera el backend
+    const modeloInsumosData: ModeloInsumos = {
+      idCliente: this.modeloInsumos?.idCliente || this.selectedUsuario.id,
+      gender: datosEditados.gender,
+      seniorCitizen: datosEditados.seniorCitizen,
+      partner: datosEditados.partner,
+      dependents: datosEditados.dependents,
+      tenure: datosEditados.tenure,
+      phoneService: datosEditados.phoneService,
+      multipleLines: datosEditados.multipleLines,
+      internetService: datosEditados.internetService,
+      onlineSecurity: datosEditados.onlineSecurity,
+      onlineBackup: datosEditados.onlineBackup,
+      deviceProtection: datosEditados.deviceProtection,
+      techSupport: datosEditados.techSupport,
+      streamingTV: datosEditados.streamingTV,
+      streamingMovies: datosEditados.streamingMovies,
+      contract: datosEditados.contract,
+      paperlessBilling: datosEditados.paperlessBilling,
+      paymentMethod: datosEditados.paymentMethod,
+      monthlyCharges: datosEditados.monthlyCharges,
+      totalCharges: datosEditados.totalCharges
+    };
+
+    console.log('📦 DATOS TRANSFORMADOS (ModeloInsumos):');
+    console.log('═══════════════════════════════════════════════════════════');
+    console.log(JSON.stringify(modeloInsumosData, null, 2));
+    console.log('═══════════════════════════════════════════════════════════');
+
+    // Verificar si los datos fueron editados comparando con los originales
+    const datosOriginales = this.modeloInsumos;
+    const datosFueronEditados = datosOriginales && (
+      datosOriginales.gender !== datosEditados.gender ||
+      datosOriginales.seniorCitizen !== datosEditados.seniorCitizen ||
+      datosOriginales.partner !== datosEditados.partner ||
+      datosOriginales.dependents !== datosEditados.dependents ||
+      datosOriginales.tenure !== Number(datosEditados.tenure) ||
+      datosOriginales.phoneService !== datosEditados.phoneService ||
+      datosOriginales.multipleLines !== datosEditados.multipleLines ||
+      datosOriginales.internetService !== datosEditados.internetService ||
+      datosOriginales.onlineSecurity !== datosEditados.onlineSecurity ||
+      datosOriginales.onlineBackup !== datosEditados.onlineBackup ||
+      datosOriginales.deviceProtection !== datosEditados.deviceProtection ||
+      datosOriginales.techSupport !== datosEditados.techSupport ||
+      datosOriginales.streamingTV !== datosEditados.streamingTV ||
+      datosOriginales.streamingMovies !== datosEditados.streamingMovies ||
+      datosOriginales.contract !== datosEditados.contract ||
+      datosOriginales.paperlessBilling !== datosEditados.paperlessBilling ||
+      datosOriginales.paymentMethod !== datosEditados.paymentMethod ||
+      datosOriginales.monthlyCharges !== Number(datosEditados.monthlyCharges) ||
+      datosOriginales.totalCharges !== Number(datosEditados.totalCharges)
+    );
+
+    console.log('📝 ¿Datos fueron editados?', datosFueronEditados);
+    if (datosFueronEditados) {
+      console.log('⚠️ ADVERTENCIA: Los datos fueron editados, pero el endpoint para datos personalizados no está disponible.');
+      console.log('ℹ️ Se usarán los datos originales de la base de datos para la predicción.');
+    }
+
+    // Usar el endpoint estándar que funciona (según la documentación: POST /api/predicciones/evaluar/{idUsuario})
+    // Este endpoint obtiene los datos automáticamente desde la vista SQL
+    console.log('🚀 Enviando solicitud de predicción al endpoint estándar...');
+    console.log(`📤 ID Usuario: ${this.selectedUsuario.id}`);
+    console.log('ℹ️ El backend obtendrá los datos desde la vista SQL vw_insumos_modelo');
+    
     this.apiService.evaluarChurnPorUsuario(this.selectedUsuario.id).subscribe({
       next: (result) => {
+        console.log('✅ RESPUESTA DEL BACKEND:');
+        console.log('═══════════════════════════════════════════════════════════');
+        console.log(JSON.stringify(result, null, 2));
+        console.log('═══════════════════════════════════════════════════════════');
+        
         this.predictionResult = result.data || result;
         this.showResult = true;
         this.isLoading = false;
+        
+        if (datosFueronEditados) {
+          this.searchError = '⚠️ Nota: Se usaron los datos originales de la BD para la predicción. Los cambios editados no se aplicaron porque el endpoint para datos personalizados no está disponible en el backend.';
+        }
       },
-      error: (error) => {
-        console.error('Error en predicción:', error);
-        this.searchError = 'Error al evaluar la predicción. Intenta nuevamente.';
+      error: (err) => {
+        console.error('❌ Error en predicción:', err);
+        console.error('Detalles del error:', JSON.stringify(err, null, 2));
+        this.searchError = `Error al evaluar la predicción: ${err.message || 'Error desconocido'}. Intenta nuevamente.`;
         this.isLoading = false;
       }
     });
@@ -248,5 +376,19 @@ export class ChurnPredictionComponent implements OnInit {
     return this.predictionResult.churn || this.predictionResult.prevision === 'Churn' 
       ? '⚠️ Churn Detectado' 
       : '✅ No Churn';
+  }
+
+  /**
+   * Obtiene los errores del formulario para debugging
+   */
+  private getFormErrors(): any {
+    const errors: any = {};
+    Object.keys(this.modeloForm.controls).forEach(key => {
+      const control = this.modeloForm.get(key);
+      if (control && control.errors) {
+        errors[key] = control.errors;
+      }
+    });
+    return errors;
   }
 }

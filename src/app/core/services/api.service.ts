@@ -66,14 +66,124 @@ export class ApiService {
 
   // Evaluar churn para un usuario específico
   evaluarChurnPorUsuario(usuarioId: string): Observable<any> {
+    const url = `${this.apiUrl}/predicciones/evaluar/${usuarioId}`;
+    const body = {}; // El backend obtiene los datos desde la vista SQL usando el idUsuario
+    const headers = this.getHeaders();
+    
+    console.log('═══════════════════════════════════════════════════════════');
+    console.log('📡 LLAMADA AL ENDPOINT: evaluarChurnPorUsuario');
+    console.log('═══════════════════════════════════════════════════════════');
+    console.log('🌐 URL:', url);
+    console.log('📋 Método: POST');
+    console.log('📦 Body:', JSON.stringify(body, null, 2));
+    console.log('📨 Headers:', JSON.stringify(headers.keys().reduce((acc, key) => {
+      acc[key] = headers.get(key);
+      return acc;
+    }, {} as any), null, 2));
+    console.log('🆔 ID Usuario:', usuarioId);
+    console.log('ℹ️ Nota: El backend obtendrá los datos desde la vista SQL vw_insumos_modelo usando este ID');
+    console.log('═══════════════════════════════════════════════════════════');
+    
+    return this.http.post<any>(url, body, { headers }).pipe(
+      map((response) => {
+        console.log('✅ RESPUESTA DEL BACKEND (evaluarChurnPorUsuario):');
+        console.log('═══════════════════════════════════════════════════════════');
+        console.log(JSON.stringify(response, null, 2));
+        console.log('═══════════════════════════════════════════════════════════');
+        return response;
+      }),
+      catchError(error => {
+        console.error('❌ ERROR EN evaluarChurnPorUsuario:');
+        console.error('═══════════════════════════════════════════════════════════');
+        console.error('URL:', url);
+        console.error('Error completo:', error);
+        if (error.error) {
+          console.error('Error body:', JSON.stringify(error.error, null, 2));
+        }
+        console.error('═══════════════════════════════════════════════════════════');
+        return throwError(() => new Error('Error al evaluar predicción de churn'));
+      })
+    );
+  }
+
+  /**
+   * Predice churn usando datos personalizados del modelo (datos editados por el usuario).
+   * Transforma los datos del formulario al formato que espera el servicio de IA.
+   */
+  predecirChurnConDatos(modeloInsumos: any): Observable<any> {
+    console.log('═══════════════════════════════════════════════════════════');
+    console.log('🔄 TRANSFORMANDO DATOS PARA EL SERVICIO DE IA');
+    console.log('═══════════════════════════════════════════════════════════');
+    console.log('📥 Datos recibidos (ModeloInsumos):', JSON.stringify(modeloInsumos, null, 2));
+    
+    // Transformar ModeloInsumos al formato CustomerInput que espera el servicio de IA
+    const customerInput = {
+      id_cliente: modeloInsumos.idCliente,
+      genero: modeloInsumos.gender,
+      adulto_mayor: modeloInsumos.seniorCitizen === 'Yes' ? 1 : 0,
+      tiene_pareja: modeloInsumos.partner,
+      tiene_dependientes: modeloInsumos.dependents,
+      antiguedad_meses: modeloInsumos.tenure,
+      servicio_telefono: modeloInsumos.phoneService,
+      lineas_multiples: modeloInsumos.multipleLines,
+      servicio_internet: modeloInsumos.internetService,
+      seguridad_en_linea: modeloInsumos.onlineSecurity,
+      respaldo_en_linea: modeloInsumos.onlineBackup,
+      proteccion_dispositivo: modeloInsumos.deviceProtection,
+      soporte_tecnico: modeloInsumos.techSupport,
+      streaming_tv: modeloInsumos.streamingTV,
+      streaming_peliculas: modeloInsumos.streamingMovies,
+      tipo_contrato: modeloInsumos.contract,
+      facturacion_electronica: modeloInsumos.paperlessBilling,
+      metodo_pago: modeloInsumos.paymentMethod,
+      cargo_mensual: modeloInsumos.monthlyCharges,
+      cargos_totales: modeloInsumos.totalCharges
+    };
+
+    console.log('📤 Datos transformados (CustomerInput - formato para IA):');
+    console.log(JSON.stringify(customerInput, null, 2));
+    console.log('═══════════════════════════════════════════════════════════');
+    console.log(`🌐 URL del endpoint: ${this.apiUrl}/predicciones/evaluar-con-datos`);
+    console.log('═══════════════════════════════════════════════════════════');
+
+    // Intentar primero con el endpoint del backend que acepta datos personalizados
     return this.http.post<any>(
-      `${this.apiUrl}/predicciones/evaluar/${usuarioId}`,
-      {},
+      `${this.apiUrl}/predicciones/evaluar-con-datos`,
+      customerInput,
       { headers: this.getHeaders() }
     ).pipe(
       catchError(error => {
-        console.error('Error evaluando churn:', error);
-        return throwError(() => new Error('Error al evaluar predicción de churn'));
+        console.error('❌ Error en predicción con datos personalizados (endpoint backend):', error);
+        console.log('🔄 Intentando con el servicio de IA externo...');
+        console.log(`🌐 URL del servicio de IA: http://163.192.138.89:8086/api/churn/predict`);
+        console.log('📤 Datos que se enviarán al servicio de IA:', JSON.stringify(customerInput, null, 2));
+        
+        // Si el endpoint no existe, enviar directamente al servicio de IA externo
+        return this.http.post<any>(
+          `http://163.192.138.89:8086/api/churn/predict`,
+          customerInput,
+          { headers: this.getHeaders() }
+        ).pipe(
+          map((response: any) => {
+            console.log('✅ Respuesta del servicio de IA:', JSON.stringify(response, null, 2));
+            const probabilidad = response.probabilidad || response.probability || 0;
+            const prevision = response.prevision || response.prediction || 'No Churn';
+            return {
+              data: {
+                customerID: customerInput.id_cliente,
+                probabilidad: probabilidad,
+                prevision: prevision,
+                churn: response.churn || (prevision === 'Churn' ? 'Yes' : 'No'),
+                riskLevel: response.riskLevel || (probabilidad > 0.7 ? 'high' : probabilidad > 0.4 ? 'medium' : 'low'),
+                recommendations: response.recommendations || []
+              }
+            };
+          }),
+          catchError(err => {
+            console.error('Error enviando a servicio de IA:', err);
+            return throwError(() => new Error('Error al obtener predicción con datos personalizados'));
+          })
+        );
       })
     );
   }
