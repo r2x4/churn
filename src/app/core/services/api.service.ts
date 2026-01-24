@@ -69,7 +69,7 @@ export class ApiService {
     const url = `${this.apiUrl}/predicciones/evaluar/${usuarioId}`;
     const body = {}; // El backend obtiene los datos desde la vista SQL usando el idUsuario
     const headers = this.getHeaders();
-    
+
     console.log('═══════════════════════════════════════════════════════════');
     console.log('📡 LLAMADA AL ENDPOINT: evaluarChurnPorUsuario');
     console.log('═══════════════════════════════════════════════════════════');
@@ -83,7 +83,7 @@ export class ApiService {
     console.log('🆔 ID Usuario:', usuarioId);
     console.log('ℹ️ Nota: El backend obtendrá los datos desde la vista SQL vw_insumos_modelo usando este ID');
     console.log('═══════════════════════════════════════════════════════════');
-    
+
     return this.http.post<any>(url, body, { headers }).pipe(
       map((response) => {
         console.log('✅ RESPUESTA DEL BACKEND (evaluarChurnPorUsuario):');
@@ -110,80 +110,34 @@ export class ApiService {
    * Predice churn usando datos personalizados del modelo (datos editados por el usuario).
    * Transforma los datos del formulario al formato que espera el servicio de IA.
    */
-  predecirChurnConDatos(modeloInsumos: any): Observable<any> {
+  predecirChurnConDatos(datosPersonalizados: any): Observable<any> {
     console.log('═══════════════════════════════════════════════════════════');
-    console.log('🔄 TRANSFORMANDO DATOS PARA EL SERVICIO DE IA');
+    console.log('📡 LLAMADA AL ENDPOINT: predecirChurnConDatos');
     console.log('═══════════════════════════════════════════════════════════');
-    console.log('📥 Datos recibidos (ModeloInsumos):', JSON.stringify(modeloInsumos, null, 2));
-    
-    // Transformar ModeloInsumos al formato CustomerInput que espera el servicio de IA
-    const customerInput = {
-      id_cliente: modeloInsumos.idCliente,
-      genero: modeloInsumos.gender,
-      adulto_mayor: modeloInsumos.seniorCitizen === 'Yes' ? 1 : 0,
-      tiene_pareja: modeloInsumos.partner,
-      tiene_dependientes: modeloInsumos.dependents,
-      antiguedad_meses: modeloInsumos.tenure,
-      servicio_telefono: modeloInsumos.phoneService,
-      lineas_multiples: modeloInsumos.multipleLines,
-      servicio_internet: modeloInsumos.internetService,
-      seguridad_en_linea: modeloInsumos.onlineSecurity,
-      respaldo_en_linea: modeloInsumos.onlineBackup,
-      proteccion_dispositivo: modeloInsumos.deviceProtection,
-      soporte_tecnico: modeloInsumos.techSupport,
-      streaming_tv: modeloInsumos.streamingTV,
-      streaming_peliculas: modeloInsumos.streamingMovies,
-      tipo_contrato: modeloInsumos.contract,
-      facturacion_electronica: modeloInsumos.paperlessBilling,
-      metodo_pago: modeloInsumos.paymentMethod,
-      cargo_mensual: modeloInsumos.monthlyCharges,
-      cargos_totales: modeloInsumos.totalCharges
-    };
-
-    console.log('📤 Datos transformados (CustomerInput - formato para IA):');
-    console.log(JSON.stringify(customerInput, null, 2));
-    console.log('═══════════════════════════════════════════════════════════');
-    console.log(`🌐 URL del endpoint: ${this.apiUrl}/predicciones/evaluar-con-datos`);
+    console.log('📤 Datos a enviar:', JSON.stringify(datosPersonalizados, null, 2));
+    console.log(`🌐 URL: ${this.apiUrl}/predicciones/evaluar-con-datos`);
     console.log('═══════════════════════════════════════════════════════════');
 
-    // Intentar primero con el endpoint del backend que acepta datos personalizados
     return this.http.post<any>(
       `${this.apiUrl}/predicciones/evaluar-con-datos`,
-      customerInput,
+      datosPersonalizados,
       { headers: this.getHeaders() }
     ).pipe(
+      map(response => {
+        console.log('✅ RESPUESTA DEL BACKEND (predecirChurnConDatos):', JSON.stringify(response, null, 2));
+        return response;
+      }),
       catchError(error => {
         console.error('❌ Error en predicción con datos personalizados (endpoint backend):', error);
-        console.log('🔄 Intentando con el servicio de IA externo...');
-        console.log(`🌐 URL del servicio de IA: http://163.192.138.89:8086/api/churn/predict`);
-        console.log('📤 Datos que se enviarán al servicio de IA:', JSON.stringify(customerInput, null, 2));
-        
-        // Si el endpoint no existe, enviar directamente al servicio de IA externo
-        return this.http.post<any>(
-          `http://163.192.138.89:8086/api/churn/predict`,
-          customerInput,
-          { headers: this.getHeaders() }
-        ).pipe(
-          map((response: any) => {
-            console.log('✅ Respuesta del servicio de IA:', JSON.stringify(response, null, 2));
-            const probabilidad = response.probabilidad || response.probability || 0;
-            const prevision = response.prevision || response.prediction || 'No Churn';
-            return {
-              data: {
-                customerID: customerInput.id_cliente,
-                probabilidad: probabilidad,
-                prevision: prevision,
-                churn: response.churn || (prevision === 'Churn' ? 'Yes' : 'No'),
-                riskLevel: response.riskLevel || (probabilidad > 0.7 ? 'high' : probabilidad > 0.4 ? 'medium' : 'low'),
-                recommendations: response.recommendations || []
-              }
-            };
-          }),
-          catchError(err => {
-            console.error('Error enviando a servicio de IA:', err);
-            return throwError(() => new Error('Error al obtener predicción con datos personalizados'));
-          })
-        );
+
+        // No intentamos con el servicio externo directamente para evitar CORS.
+        // El backend debería manejar la comunicación con servicios externos.
+        let errorMessage = 'Error al obtener predicción con datos personalizados';
+        if (error.error && error.error.message) {
+          errorMessage = error.error.message;
+        }
+
+        return throwError(() => new Error(errorMessage));
       })
     );
   }
