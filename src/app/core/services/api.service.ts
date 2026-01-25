@@ -19,6 +19,13 @@ type LoginRequest = {
   password: string;
 };
 
+type LoginApiResponse = {
+  username: string;
+  message: string;
+  jwt: string;
+  status: boolean;
+};
+
 type ApiResponse<T> = {
   time: string;
   message: string;
@@ -32,7 +39,7 @@ type ApiResponse<T> = {
 export class ApiService {
   private apiUrl = environment.apiBaseUrl;
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient) { }
 
   private getHeaders(): HttpHeaders {
     return new HttpHeaders({
@@ -53,6 +60,123 @@ export class ApiService {
         console.error('Error en predicción:', error);
         // Datos mock para desarrollo
         return of(this.getMockChurnPrediction(data));
+      })
+    );
+  }
+
+  // Evaluar churn para un usuario específico
+  evaluarChurnPorUsuario(usuarioId: string): Observable<any> {
+    const url = `${this.apiUrl}/predicciones/evaluar/${usuarioId}`;
+    const body = {}; // El backend obtiene los datos desde la vista SQL usando el idUsuario
+    const headers = this.getHeaders();
+
+    console.log('═══════════════════════════════════════════════════════════');
+    console.log('📡 LLAMADA AL ENDPOINT: evaluarChurnPorUsuario');
+    console.log('═══════════════════════════════════════════════════════════');
+    console.log('🌐 URL:', url);
+    console.log('📋 Método: POST');
+    console.log('📦 Body:', JSON.stringify(body, null, 2));
+    console.log('📨 Headers:', JSON.stringify(headers.keys().reduce((acc, key) => {
+      acc[key] = headers.get(key);
+      return acc;
+    }, {} as any), null, 2));
+    console.log('🆔 ID Usuario:', usuarioId);
+    console.log('ℹ️ Nota: El backend obtendrá los datos desde la vista SQL vw_insumos_modelo usando este ID');
+    console.log('═══════════════════════════════════════════════════════════');
+
+    return this.http.post<any>(url, body, { headers }).pipe(
+      map((response) => {
+        console.log('✅ RESPUESTA DEL BACKEND (evaluarChurnPorUsuario):');
+        console.log('═══════════════════════════════════════════════════════════');
+        console.log(JSON.stringify(response, null, 2));
+        console.log('═══════════════════════════════════════════════════════════');
+        return response;
+      }),
+      catchError(error => {
+        console.error('❌ ERROR EN evaluarChurnPorUsuario:');
+        console.error('═══════════════════════════════════════════════════════════');
+        console.error('URL:', url);
+        console.error('Error completo:', error);
+        if (error.error) {
+          console.error('Error body:', JSON.stringify(error.error, null, 2));
+        }
+        console.error('═══════════════════════════════════════════════════════════');
+        return throwError(() => new Error('Error al evaluar predicción de churn'));
+      })
+    );
+  }
+
+  /**
+   * Predice churn usando datos personalizados del modelo (datos editados por el usuario).
+   * Transforma los datos del formulario al formato que espera el servicio de IA.
+   */
+  predecirChurnConDatos(datosPersonalizados: any): Observable<any> {
+    console.log('═══════════════════════════════════════════════════════════');
+    console.log('📡 LLAMADA AL ENDPOINT: predecirChurnConDatos');
+    console.log('═══════════════════════════════════════════════════════════');
+    console.log('📤 Datos a enviar:', JSON.stringify(datosPersonalizados, null, 2));
+    console.log(`🌐 URL: ${this.apiUrl}/predicciones/evaluar-con-datos`);
+    console.log('═══════════════════════════════════════════════════════════');
+
+    return this.http.post<any>(
+      `${this.apiUrl}/predicciones/evaluar-con-datos`,
+      datosPersonalizados,
+      { headers: this.getHeaders() }
+    ).pipe(
+      map(response => {
+        console.log('✅ RESPUESTA DEL BACKEND (predecirChurnConDatos):', JSON.stringify(response, null, 2));
+        return response;
+      }),
+      catchError(error => {
+        console.error('❌ Error en predicción con datos personalizados (endpoint backend):', error);
+
+        // No intentamos con el servicio externo directamente para evitar CORS.
+        // El backend debería manejar la comunicación con servicios externos.
+        let errorMessage = 'Error al obtener predicción con datos personalizados';
+        if (error.error && error.error.message) {
+          errorMessage = error.error.message;
+        }
+
+        return throwError(() => new Error(errorMessage));
+      })
+    );
+  }
+
+  // Obtener lista de predicciones
+  obtenerPredicciones(): Observable<any[]> {
+    return this.http.get<any[]>(
+      `${this.apiUrl}/predicciones`,
+      { headers: this.getHeaders() }
+    ).pipe(
+      catchError(error => {
+        console.error('Error obteniendo predicciones:', error);
+        return of([]);
+      })
+    );
+  }
+
+  // Obtener estadísticas de predicciones
+  obtenerEstadisticasPredicciones(): Observable<any> {
+    return this.http.get<any>(
+      `${this.apiUrl}/predicciones/estadisticas/conteo`,
+      { headers: this.getHeaders() }
+    ).pipe(
+      catchError(error => {
+        console.error('Error obteniendo estadísticas:', error);
+        return of({ totalEvaluados: 0, totalChurn: 0 });
+      })
+    );
+  }
+
+  // Obtener datos del modelo para predicción
+  obtenerModeloInsumos(idUsuario: string): Observable<any> {
+    return this.http.get<any>(
+      `${this.apiUrl}/modelo-insumos/${idUsuario}`,
+      { headers: this.getHeaders() }
+    ).pipe(
+      catchError(error => {
+        console.error('Error obteniendo datos del modelo:', error);
+        return of({ success: false, data: null });
       })
     );
   }
@@ -111,13 +235,13 @@ export class ApiService {
 
   login(credentials: LoginRequest): Observable<{ token: string }> {
     return this.http
-      .post<ApiResponse<string>>(`${environment.authBaseUrl}/login`, credentials, { headers: this.getHeaders() })
+      .post<LoginApiResponse>(`${environment.authBaseUrl}/login`, credentials, { headers: this.getHeaders() })
       .pipe(
         map((response) => {
-          if (!response?.success || !response.data) {
+          if (!response?.status || !response.jwt) {
             throw new Error(response?.message || 'Login inválido');
           }
-          return { token: response.data };
+          return { token: response.jwt };
         }),
         catchError((err: unknown) => {
           if (err instanceof HttpErrorResponse) {
