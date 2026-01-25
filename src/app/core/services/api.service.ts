@@ -11,7 +11,7 @@ import {
   ChurnPredictionResponse,
   CompanyStatistics,
   ChurnByCategory,
-  RevenueStats
+  RevenueStats,
 } from '../models/customer.model';
 
 type LoginRequest = {
@@ -34,34 +34,34 @@ type ApiResponse<T> = {
 };
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class ApiService {
   private apiUrl = environment.apiBaseUrl;
 
-  constructor(private http: HttpClient) { }
+  constructor(private http: HttpClient) {}
 
   private getHeaders(): HttpHeaders {
     return new HttpHeaders({
       'Content-Type': 'application/json',
-      'Accept': 'application/json'
+      Accept: 'application/json',
     });
   }
 
   // ============= PREDICCIÓN DE CHURN =============
 
   predictChurn(data: ChurnPredictionRequest): Observable<ChurnPredictionResponse> {
-    return this.http.post<ChurnPredictionResponse>(
-      `${this.apiUrl}/predict-churn`,
-      data,
-      { headers: this.getHeaders() }
-    ).pipe(
-      catchError(error => {
-        console.error('Error en predicción:', error);
-        // Datos mock para desarrollo
-        return of(this.getMockChurnPrediction(data));
+    return this.http
+      .post<ChurnPredictionResponse>(`${this.apiUrl}/predict-churn`, data, {
+        headers: this.getHeaders(),
       })
-    );
+      .pipe(
+        catchError((error) => {
+          console.error('Error en predicción:', error);
+          // Datos mock para desarrollo
+          return of(this.getMockChurnPrediction(data));
+        }),
+      );
   }
 
   // Evaluar churn para un usuario específico
@@ -69,21 +69,30 @@ export class ApiService {
     const url = `${this.apiUrl}/predicciones/evaluar/${usuarioId}`;
     const body = {}; // El backend obtiene los datos desde la vista SQL usando el idUsuario
     const headers = this.getHeaders();
-    
+
     console.log('═══════════════════════════════════════════════════════════');
     console.log('📡 LLAMADA AL ENDPOINT: evaluarChurnPorUsuario');
     console.log('═══════════════════════════════════════════════════════════');
     console.log('🌐 URL:', url);
     console.log('📋 Método: POST');
     console.log('📦 Body:', JSON.stringify(body, null, 2));
-    console.log('📨 Headers:', JSON.stringify(headers.keys().reduce((acc, key) => {
-      acc[key] = headers.get(key);
-      return acc;
-    }, {} as any), null, 2));
+    console.log(
+      '📨 Headers:',
+      JSON.stringify(
+        headers.keys().reduce((acc, key) => {
+          acc[key] = headers.get(key);
+          return acc;
+        }, {} as any),
+        null,
+        2,
+      ),
+    );
     console.log('🆔 ID Usuario:', usuarioId);
-    console.log('ℹ️ Nota: El backend obtendrá los datos desde la vista SQL vw_insumos_modelo usando este ID');
+    console.log(
+      'ℹ️ Nota: El backend obtendrá los datos desde la vista SQL vw_insumos_modelo usando este ID',
+    );
     console.log('═══════════════════════════════════════════════════════════');
-    
+
     return this.http.post<any>(url, body, { headers }).pipe(
       map((response) => {
         console.log('✅ RESPUESTA DEL BACKEND (evaluarChurnPorUsuario):');
@@ -92,7 +101,7 @@ export class ApiService {
         console.log('═══════════════════════════════════════════════════════════');
         return response;
       }),
-      catchError(error => {
+      catchError((error) => {
         console.error('❌ ERROR EN evaluarChurnPorUsuario:');
         console.error('═══════════════════════════════════════════════════════════');
         console.error('URL:', url);
@@ -102,7 +111,7 @@ export class ApiService {
         }
         console.error('═══════════════════════════════════════════════════════════');
         return throwError(() => new Error('Error al evaluar predicción de churn'));
-      })
+      }),
     );
   }
 
@@ -115,29 +124,36 @@ export class ApiService {
     console.log('🔄 TRANSFORMANDO DATOS PARA EL SERVICIO DE IA');
     console.log('═══════════════════════════════════════════════════════════');
     console.log('📥 Datos recibidos (ModeloInsumos):', JSON.stringify(modeloInsumos, null, 2));
-    
+
     // Transformar ModeloInsumos al formato CustomerInput que espera el servicio de IA
     const customerInput = {
-      id_cliente: modeloInsumos.idCliente,
-      genero: modeloInsumos.gender,
-      adulto_mayor: modeloInsumos.seniorCitizen === 'Yes' ? 1 : 0,
-      tiene_pareja: modeloInsumos.partner,
-      tiene_dependientes: modeloInsumos.dependents,
-      antiguedad_meses: modeloInsumos.tenure,
-      servicio_telefono: modeloInsumos.phoneService,
-      lineas_multiples: modeloInsumos.multipleLines,
-      servicio_internet: modeloInsumos.internetService,
-      seguridad_en_linea: modeloInsumos.onlineSecurity,
-      respaldo_en_linea: modeloInsumos.onlineBackup,
-      proteccion_dispositivo: modeloInsumos.deviceProtection,
-      soporte_tecnico: modeloInsumos.techSupport,
-      streaming_tv: modeloInsumos.streamingTV,
-      streaming_peliculas: modeloInsumos.streamingMovies,
-      tipo_contrato: modeloInsumos.contract,
-      facturacion_electronica: modeloInsumos.paperlessBilling,
-      metodo_pago: modeloInsumos.paymentMethod,
-      cargo_mensual: modeloInsumos.monthlyCharges,
-      cargos_totales: modeloInsumos.totalCharges
+      id_cliente: modeloInsumos.id_cliente || modeloInsumos.idCliente,
+      genero: modeloInsumos.genero || modeloInsumos.gender,
+      adulto_mayor:
+        modeloInsumos.adulto_mayor !== undefined
+          ? modeloInsumos.adulto_mayor
+          : modeloInsumos.seniorCitizen === 'Yes'
+            ? 1
+            : 0,
+      tiene_pareja: modeloInsumos.tienepareja || modeloInsumos.partner,
+      tiene_dependientes: modeloInsumos.tiene_dependientes || modeloInsumos.dependents,
+      antiguedad_meses: modeloInsumos.antiguedad_meses || modeloInsumos.tenure,
+      servicio_telefono: modeloInsumos.servicio_telefono || modeloInsumos.phoneService,
+      lineas_multiples: modeloInsumos.lineas_multiples || modeloInsumos.multipleLines,
+      servicio_internet: modeloInsumos.servicio_internet || modeloInsumos.internetService,
+      seguridad_en_linea: modeloInsumos.seguridad_en_linea || modeloInsumos.onlineSecurity,
+      respaldo_en_linea: modeloInsumos.respaldo_en_linea || modeloInsumos.onlineBackup,
+      proteccion_dispositivo:
+        modeloInsumos.proteccion_dispositivo || modeloInsumos.deviceProtection,
+      soporte_tecnico: modeloInsumos.soporte_tecnico || modeloInsumos.techSupport,
+      streaming_tv: modeloInsumos.streaming_tv || modeloInsumos.streamingTV,
+      streaming_peliculas: modeloInsumos.streaming_peliculas || modeloInsumos.streamingMovies,
+      tipo_contrato: modeloInsumos.tipo_contrato || modeloInsumos.contract,
+      facturacion_electronica:
+        modeloInsumos.facturacion_electronica || modeloInsumos.paperlessBilling,
+      metodo_pago: modeloInsumos.metodo_pago || modeloInsumos.paymentMethod,
+      cargo_mensual: modeloInsumos.cargo_mensual || modeloInsumos.monthlyCharges,
+      cargos_totales: modeloInsumos.cargos_totales || modeloInsumos.totalCharges,
     };
 
     console.log('📤 Datos transformados (CustomerInput - formato para IA):');
@@ -147,141 +163,148 @@ export class ApiService {
     console.log('═══════════════════════════════════════════════════════════');
 
     // Intentar primero con el endpoint del backend que acepta datos personalizados
-    return this.http.post<any>(
-      `${this.apiUrl}/predicciones/evaluar-con-datos`,
-      customerInput,
-      { headers: this.getHeaders() }
-    ).pipe(
-      catchError(error => {
-        console.error('❌ Error en predicción con datos personalizados (endpoint backend):', error);
-        console.log('🔄 Intentando con el servicio de IA externo...');
-        console.log(`🌐 URL del servicio de IA: http://163.192.138.89:8086/api/churn/predict`);
-        console.log('📤 Datos que se enviarán al servicio de IA:', JSON.stringify(customerInput, null, 2));
-        
-        // Si el endpoint no existe, enviar directamente al servicio de IA externo
-        return this.http.post<any>(
-          `http://163.192.138.89:8086/api/churn/predict`,
-          customerInput,
-          { headers: this.getHeaders() }
-        ).pipe(
-          map((response: any) => {
-            console.log('✅ Respuesta del servicio de IA:', JSON.stringify(response, null, 2));
-            const probabilidad = response.probabilidad || response.probability || 0;
-            const prevision = response.prevision || response.prediction || 'No Churn';
-            return {
-              data: {
-                customerID: customerInput.id_cliente,
-                probabilidad: probabilidad,
-                prevision: prevision,
-                churn: response.churn || (prevision === 'Churn' ? 'Yes' : 'No'),
-                riskLevel: response.riskLevel || (probabilidad > 0.7 ? 'high' : probabilidad > 0.4 ? 'medium' : 'low'),
-                recommendations: response.recommendations || []
-              }
-            };
-          }),
-          catchError(err => {
-            console.error('Error enviando a servicio de IA:', err);
-            return throwError(() => new Error('Error al obtener predicción con datos personalizados'));
-          })
-        );
+    return this.http
+      .post<any>(`${this.apiUrl}/predicciones/evaluar-con-datos`, customerInput, {
+        headers: this.getHeaders(),
       })
-    );
+      .pipe(
+        catchError((error) => {
+          console.error(
+            '❌ Error en predicción con datos personalizados (endpoint backend):',
+            error,
+          );
+          console.log('🔄 Intentando con el servicio de IA externo...');
+          console.log(`🌐 URL del servicio de IA: http://163.192.138.89:8086/api/churn/predict`);
+          console.log(
+            '📤 Datos que se enviarán al servicio de IA:',
+            JSON.stringify(customerInput, null, 2),
+          );
+
+          // Si el endpoint no existe, enviar directamente al servicio de IA externo
+          return this.http
+            .post<any>(`http://163.192.138.89:8086/api/churn/predict`, customerInput, {
+              headers: this.getHeaders(),
+            })
+            .pipe(
+              map((response: any) => {
+                console.log('✅ Respuesta del servicio de IA:', JSON.stringify(response, null, 2));
+                const probabilidad = response.probabilidad || response.probability || 0;
+                const prevision = response.prevision || response.prediction || 'No Churn';
+                return {
+                  data: {
+                    customerID: customerInput.id_cliente,
+                    probabilidad: probabilidad,
+                    prevision: prevision,
+                    churn: response.churn || (prevision === 'Churn' ? 'Yes' : 'No'),
+                    riskLevel:
+                      response.riskLevel ||
+                      (probabilidad > 0.7 ? 'high' : probabilidad > 0.4 ? 'medium' : 'low'),
+                    recommendations: response.recommendations || [],
+                  },
+                };
+              }),
+              catchError((err) => {
+                console.error('Error enviando a servicio de IA:', err);
+                return throwError(
+                  () => new Error('Error al obtener predicción con datos personalizados'),
+                );
+              }),
+            );
+        }),
+      );
   }
 
   // Obtener lista de predicciones
   obtenerPredicciones(): Observable<any[]> {
-    return this.http.get<any[]>(
-      `${this.apiUrl}/predicciones`,
-      { headers: this.getHeaders() }
-    ).pipe(
-      catchError(error => {
+    return this.http.get<any[]>(`${this.apiUrl}/predicciones`, { headers: this.getHeaders() }).pipe(
+      catchError((error) => {
         console.error('Error obteniendo predicciones:', error);
         return of([]);
-      })
+      }),
     );
   }
 
   // Obtener estadísticas de predicciones
   obtenerEstadisticasPredicciones(): Observable<any> {
-    return this.http.get<any>(
-      `${this.apiUrl}/predicciones/estadisticas/conteo`,
-      { headers: this.getHeaders() }
-    ).pipe(
-      catchError(error => {
-        console.error('Error obteniendo estadísticas:', error);
-        return of({ totalEvaluados: 0, totalChurn: 0 });
-      })
-    );
+    return this.http
+      .get<any>(`${this.apiUrl}/predicciones/estadisticas/conteo`, { headers: this.getHeaders() })
+      .pipe(
+        catchError((error) => {
+          console.error('Error obteniendo estadísticas:', error);
+          return of({ totalEvaluados: 0, totalChurn: 0 });
+        }),
+      );
   }
 
   // Obtener datos del modelo para predicción
   obtenerModeloInsumos(idUsuario: string): Observable<any> {
-    return this.http.get<any>(
-      `${this.apiUrl}/modelo-insumos/${idUsuario}`,
-      { headers: this.getHeaders() }
-    ).pipe(
-      catchError(error => {
-        console.error('Error obteniendo datos del modelo:', error);
-        return of({ success: false, data: null });
-      })
-    );
+    return this.http
+      .get<any>(`${this.apiUrl}/modelo-insumos/${idUsuario}`, { headers: this.getHeaders() })
+      .pipe(
+        catchError((error) => {
+          console.error('Error obteniendo datos del modelo:', error);
+          return of({ success: false, data: null });
+        }),
+      );
   }
 
   getCustomerForPrediction(customerId: string): Observable<Customer> {
-    return this.http.get<Customer>(
-      `${this.apiUrl}/customers/${customerId}`,
-      { headers: this.getHeaders() }
-    ).pipe(
-      catchError(error => {
-        console.error('Error obteniendo cliente:', error);
-        return of(this.getMockCustomer(customerId));
-      })
-    );
+    return this.http
+      .get<Customer>(`${this.apiUrl}/customers/${customerId}`, { headers: this.getHeaders() })
+      .pipe(
+        catchError((error) => {
+          console.error('Error obteniendo cliente:', error);
+          return of(this.getMockCustomer(customerId));
+        }),
+      );
   }
 
   // ============= ESTADÍSTICAS DE LA EMPRESA =============
 
   getCompanyStatistics(): Observable<CompanyStatistics> {
-    return this.http.get<CompanyStatistics>(
-      `${this.apiUrl}/statistics/company`,
-      { headers: this.getHeaders() }
-    ).pipe(
-      catchError(error => {
-        console.error('Error obteniendo estadísticas:', error);
-        return of(this.getMockCompanyStats());
-      })
-    );
+    return this.http
+      .get<CompanyStatistics>(`${this.apiUrl}/statistics/company`, { headers: this.getHeaders() })
+      .pipe(
+        catchError((error) => {
+          console.error('Error obteniendo estadísticas:', error);
+          return of(this.getMockCompanyStats());
+        }),
+      );
   }
 
   getChurnByCategory(category: string): Observable<ChurnByCategory[]> {
-    return this.http.get<ChurnByCategory[]>(
-      `${this.apiUrl}/statistics/churn-by/${category}`,
-      { headers: this.getHeaders() }
-    ).pipe(
-      catchError(error => {
-        console.error('Error obteniendo churn por categoría:', error);
-        return of(this.getMockChurnByCategory(category));
-      })
-    );
+    return this.http
+      .get<
+        ChurnByCategory[]
+      >(`${this.apiUrl}/statistics/churn-by/${category}`, { headers: this.getHeaders() })
+      .pipe(
+        catchError((error) => {
+          console.error('Error obteniendo churn por categoría:', error);
+          return of(this.getMockChurnByCategory(category));
+        }),
+      );
   }
 
   getRevenueStats(period: string = 'monthly'): Observable<RevenueStats[]> {
-    return this.http.get<RevenueStats[]>(
-      `${this.apiUrl}/statistics/revenue?period=${period}`,
-      { headers: this.getHeaders() }
-    ).pipe(
-      catchError(error => {
-        console.error('Error obteniendo ingresos:', error);
-        return of(this.getMockRevenueStats());
-      })
-    );
+    return this.http
+      .get<
+        RevenueStats[]
+      >(`${this.apiUrl}/statistics/revenue?period=${period}`, { headers: this.getHeaders() })
+      .pipe(
+        catchError((error) => {
+          console.error('Error obteniendo ingresos:', error);
+          return of(this.getMockRevenueStats());
+        }),
+      );
   }
 
   // ============= AUTENTICACIÓN =============
 
   login(credentials: LoginRequest): Observable<{ token: string }> {
     return this.http
-      .post<LoginApiResponse>(`${environment.authBaseUrl}/login`, credentials, { headers: this.getHeaders() })
+      .post<LoginApiResponse>(`${environment.authBaseUrl}/login`, credentials, {
+        headers: this.getHeaders(),
+      })
       .pipe(
         map((response) => {
           if (!response?.status || !response.jwt) {
@@ -298,7 +321,7 @@ export class ApiService {
 
           const message = err instanceof Error ? err.message : 'Error de autenticación';
           return throwError(() => new Error(message));
-        })
+        }),
       );
   }
 
@@ -311,15 +334,14 @@ export class ApiService {
   }
 
   getAllCustomers(): Observable<Customer[]> {
-    return this.http.get<Customer[]>(
-      `${this.apiUrl}/customers`,
-      { headers: this.getHeaders() }
-    ).pipe(
-      catchError(error => {
-        console.error('Error obteniendo clientes:', error);
-        return of(this.getMockCustomers());
-      })
-    );
+    return this.http
+      .get<Customer[]>(`${this.apiUrl}/customers`, { headers: this.getHeaders() })
+      .pipe(
+        catchError((error) => {
+          console.error('Error obteniendo clientes:', error);
+          return of(this.getMockCustomers());
+        }),
+      );
   }
 
   // ============= DATOS MOCK PARA DESARROLLO =============
@@ -334,8 +356,8 @@ export class ApiService {
       recommendations: [
         'Ofrecer descuento en el próximo mes',
         'Contactar al cliente para resolver problemas',
-        'Proponer upgrade de plan con beneficios'
-      ]
+        'Proponer upgrade de plan con beneficios',
+      ],
     };
   }
 
@@ -361,7 +383,7 @@ export class ApiService {
       PaymentMethod: 'Electronic check',
       MonthlyCharges: 85.5,
       TotalCharges: 1026.0,
-      Churn: 'No'
+      Churn: 'No',
     };
   }
 
@@ -372,31 +394,79 @@ export class ApiService {
       churnedCustomers: 1869,
       churnRate: 26.5,
       averageRevenue: 64.76,
-      totalRevenue: 456187.50,
+      totalRevenue: 456187.5,
       averageTenure: 32.4,
-      newCustomersThisMonth: 245
+      newCustomersThisMonth: 245,
     };
   }
 
   private getMockChurnByCategory(category: string): ChurnByCategory[] {
     if (category === 'contract') {
       return [
-        { category: 'Contract', value: 'Month-to-month', churnCount: 1655, totalCount: 3875, churnRate: 42.7 },
-        { category: 'Contract', value: 'One year', churnCount: 166, totalCount: 1473, churnRate: 11.3 },
-        { category: 'Contract', value: 'Two year', churnCount: 48, totalCount: 1695, churnRate: 2.8 }
+        {
+          category: 'Contract',
+          value: 'Month-to-month',
+          churnCount: 1655,
+          totalCount: 3875,
+          churnRate: 42.7,
+        },
+        {
+          category: 'Contract',
+          value: 'One year',
+          churnCount: 166,
+          totalCount: 1473,
+          churnRate: 11.3,
+        },
+        {
+          category: 'Contract',
+          value: 'Two year',
+          churnCount: 48,
+          totalCount: 1695,
+          churnRate: 2.8,
+        },
       ];
     }
     if (category === 'InternetService') {
       return [
-        { category: 'InternetService', value: 'Fiber optic', churnCount: 1297, totalCount: 3096, churnRate: 41.9 },
-        { category: 'InternetService', value: 'DSL', churnCount: 459, totalCount: 2421, churnRate: 19.0 },
-        { category: 'InternetService', value: 'No Internet', churnCount: 113, totalCount: 1526, churnRate: 7.4 }
+        {
+          category: 'InternetService',
+          value: 'Fiber optic',
+          churnCount: 1297,
+          totalCount: 3096,
+          churnRate: 41.9,
+        },
+        {
+          category: 'InternetService',
+          value: 'DSL',
+          churnCount: 459,
+          totalCount: 2421,
+          churnRate: 19.0,
+        },
+        {
+          category: 'InternetService',
+          value: 'No Internet',
+          churnCount: 113,
+          totalCount: 1526,
+          churnRate: 7.4,
+        },
       ];
     }
     if (category === 'gender') {
       return [
-        { category: 'Gender', value: 'Masculino', churnCount: 930, totalCount: 3555, churnRate: 26.16 },
-        { category: 'Gender', value: 'Femenino', churnCount: 939, totalCount: 3488, churnRate: 26.92 }
+        {
+          category: 'Gender',
+          value: 'Masculino',
+          churnCount: 930,
+          totalCount: 3555,
+          churnRate: 26.16,
+        },
+        {
+          category: 'Gender',
+          value: 'Femenino',
+          churnCount: 939,
+          totalCount: 3488,
+          churnRate: 26.92,
+        },
       ];
     }
     return [];
@@ -409,7 +479,7 @@ export class ApiService {
       { period: 'Marzo', revenue: 39800, customers: 595, averagePerCustomer: 66.89 },
       { period: 'Abril', revenue: 42100, customers: 640, averagePerCustomer: 65.78 },
       { period: 'Mayo', revenue: 43500, customers: 665, averagePerCustomer: 65.41 },
-      { period: 'Junio', revenue: 44800, customers: 685, averagePerCustomer: 65.40 }
+      { period: 'Junio', revenue: 44800, customers: 685, averagePerCustomer: 65.4 },
     ];
   }
 
@@ -436,7 +506,7 @@ export class ApiService {
         PaymentMethod: 'Electronic check',
         MonthlyCharges: 29.85,
         TotalCharges: 29.85,
-        Churn: 'No'
+        Churn: 'No',
       },
       {
         customerID: '5575-GNVDE',
@@ -459,8 +529,8 @@ export class ApiService {
         PaymentMethod: 'Mailed check',
         MonthlyCharges: 56.95,
         TotalCharges: 1889.5,
-        Churn: 'No'
-      }
+        Churn: 'No',
+      },
     ];
   }
 }
