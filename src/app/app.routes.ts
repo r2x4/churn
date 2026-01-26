@@ -7,11 +7,11 @@ import { LoginComponent } from './features/auth/login/login.component';
 import { AuthGuard } from './features/auth/login/auth.guard';
 
 export const routes: Routes = [
-    { path: 'dashboard', component: DashboardComponent },
-    { path: 'churn-prediction', component: ChurnPredictionComponent },
-    { path: 'company-statistics', component: CompanyStatisticsComponent },
+    { path: 'dashboard', component: DashboardComponent, canActivate: [AuthGuard] },
+    { path: 'churn-prediction', component: ChurnPredictionComponent, canActivate: [AuthGuard] },
+    { path: 'company-statistics', component: CompanyStatisticsComponent, canActivate: [AuthGuard] },
     { path: 'admin', component: AdminComponent, canActivate: [AuthGuard] },
-    { path: 'login', component: LoginComponent }, // Agregar la ruta de login
-    { path: '', redirectTo: '/dashboard', pathMatch: 'full' },
-    { path: '**', redirectTo: '/dashboard' }
+    { path: 'login', component: LoginComponent },
+    { path: '', redirectTo: '/login', pathMatch: 'full' },
+    { path: '**', redirectTo: '/login' }
 ];

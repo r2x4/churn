@@ -88,3 +88,47 @@
 .nav-item.collapsed .icon {
   margin: 0;
 }
+
+/* Sub-menu styling */
+.sub-item {
+  padding-left: 3rem !important;
+  margin: 2px 8px 2px 16px !important;
+  border-radius: 8px !important;
+}
+
+.sub-item .icon {
+  font-size: 1rem;
+  width: 1.5rem;
+}
+
+.sub-item .title {
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.sub-item.active {
+  background: rgba(255, 255, 255, 0.1);
+  box-shadow: none;
+}
+
+.sub-item.active .indicator {
+  width: 4px;
+}
+
+/* Custom Scrollbar for the menu */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 4px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 10px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.3);
+}

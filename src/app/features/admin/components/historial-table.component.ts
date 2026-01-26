@@ -3,10 +3,10 @@ import { CommonModule } from '@angular/common';
 import { HistorialPrediccion } from '../../../core/models/historial.model';
 
 @Component({
-    selector: 'app-historial-table',
-    standalone: true,
-    imports: [CommonModule],
-    template: `
+  selector: 'app-historial-table',
+  standalone: true,
+  imports: [CommonModule],
+  template: `
     <div class="overflow-x-auto shadow-lg rounded-2xl border border-gray-200">
       <table class="w-full divide-y divide-gray-200 bg-white">
         <!-- Header -->
@@ -76,6 +76,29 @@ import { HistorialPrediccion } from '../../../core/models/historial.model';
           </tr>
         </tbody>
       </table>
+
+      <!-- Pagination Footer -->
+      <div class="px-6 py-4 bg-gray-50 border-t border-gray-200 flex items-center justify-between">
+        <div class="text-sm text-gray-700">
+          Mostrando <span class="font-bold">{{ getStartRange() }}</span> a <span class="font-bold">{{ getEndRange() }}</span> de <span class="font-bold">{{ totalEntries }}</span> registros
+        </div>
+        <div class="flex gap-2">
+          <button (click)="changePage(pagina - 1)" 
+                  [disabled]="pagina === 0"
+                  class="px-4 py-2 text-sm font-semibold text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-all">
+            Anterior
+          </button>
+          <div class="flex items-center gap-1">
+            <span class="px-3 py-2 text-sm font-bold text-indigo-600 bg-indigo-50 rounded-lg">Página {{ pagina + 1 }}</span>
+          </div>
+          <button (click)="changePage(pagina + 1)" 
+                  [disabled]="isLastPage()"
+                  class="px-4 py-2 text-sm font-semibold text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-all">
+            Siguiente
+          </button>
+        </div>
+      </div>
+
       <!-- Empty State -->
       <div *ngIf="historyList.length === 0" class="text-center py-16 bg-gray-50">
         <div class="text-4xl mb-3">📊</div>
@@ -85,10 +108,32 @@ import { HistorialPrediccion } from '../../../core/models/historial.model';
   `
 })
 export class HistorialTableComponent {
-    @Input() historyList: HistorialPrediccion[] = [];
-    @Input() isDeletedView: boolean = false;
+  @Input() historyList: HistorialPrediccion[] = [];
+  @Input() isDeletedView: boolean = false;
+  @Input() pagina: number = 0;
+  @Input() tamanio: number = 10;
+  @Input() totalEntries: number = 0;
 
-    @Output() onView = new EventEmitter<HistorialPrediccion>();
-    
-    @Output() onDelete = new EventEmitter<number>();
+  @Output() onView = new EventEmitter<HistorialPrediccion>();
+  @Output() onDelete = new EventEmitter<number>();
+  @Output() onPageChange = new EventEmitter<number>();
+
+  getStartRange(): number {
+    return this.totalEntries === 0 ? 0 : (this.pagina * this.tamanio) + 1;
+  }
+
+  getEndRange(): number {
+    const end = (this.pagina + 1) * this.tamanio;
+    return end > this.totalEntries ? this.totalEntries : end;
+  }
+
+  isLastPage(): boolean {
+    return (this.pagina + 1) * this.tamanio >= this.totalEntries;
+  }
+
+  changePage(newPage: number): void {
+    if (newPage >= 0 && !this.isLastPage() || newPage < this.pagina) {
+      this.onPageChange.emit(newPage);
+    }
+  }
 }

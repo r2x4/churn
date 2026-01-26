@@ -25,12 +25,6 @@ export class SidebarComponent {
       active: false
     },
     {
-      title: 'Predicción de Churn',
-      icon: 'fas fa-user-slash',
-      route: '/churn-prediction',
-      active: false
-    },
-    {
       title: 'Estadísticas Empresa',
       icon: 'fas fa-chart-bar',
       route: '/company-statistics',
@@ -40,9 +34,24 @@ export class SidebarComponent {
       title: 'Administración',
       icon: 'fas fa-cog',
       route: '/admin',
-      active: false
+      active: false,
+      expanded: false,
+      children: [
+        { title: 'Predicción de Churn', route: '/admin', queryParams: { tab: 'churn' }, icon: 'fas fa-dna' },
+        { title: 'Historial de Datos', route: '/admin', queryParams: { tab: 'history' }, icon: 'fas fa-history' },
+        { title: 'Gestión de Usuarios', route: '/admin', queryParams: { tab: 'users' }, icon: 'fas fa-users' },
+        { title: 'Roles y Permisos', route: '/admin', queryParams: { tab: 'roles' }, icon: 'fas fa-user-shield' },
+        { title: 'Planes', route: '/admin', queryParams: { tab: 'planes' }, icon: 'fas fa-mobile-alt' },
+        { title: 'Ofertas', route: '/admin', queryParams: { tab: 'ofertas' }, icon: 'fas fa-gift' },
+        { title: 'Servicios', route: '/admin', queryParams: { tab: 'servicios' }, icon: 'fas fa-tools' }
+      ]
     }
   ];
+
+  toggleExpand(item: any, event: Event): void {
+    event.stopPropagation();
+    item.expanded = !item.expanded;
+  }
 
   constructor(
     private router: Router,
@@ -71,20 +80,41 @@ export class SidebarComponent {
     return this.apiService.isAuthenticated();
   }
 
-  navigate(route: string): void {
-    this.menuItems.forEach(item => item.active = false);
-    const selectedItem = this.menuItems.find(item => item.route === route);
-    if (selectedItem) {
-      selectedItem.active = true;
+  navigate(item: any): void {
+    if (item.children && !this.isCollapsed) {
+      item.expanded = !item.expanded;
+      return;
     }
-    this.router.navigate([route]);
+
+    this.menuItems.forEach(i => i.active = false);
+    item.active = true;
+
+    if (item.queryParams) {
+      this.router.navigate([item.route], { queryParams: item.queryParams });
+    } else {
+      this.router.navigate([item.route]);
+    }
   }
 
-  isActive(route: string): boolean {
+  isActive(item: any): boolean {
     const currentUrl = this.router.url;
-    if (route === '/admin' && currentUrl.includes('/login')) {
-      return true;
+
+    if (item.children) {
+      return item.children.some((child: any) => {
+        const urlWithParams = this.router.serializeUrl(
+          this.router.createUrlTree([child.route], { queryParams: child.queryParams })
+        );
+        return currentUrl === urlWithParams;
+      });
     }
-    return currentUrl === route;
+
+    if (item.queryParams) {
+      const urlWithParams = this.router.serializeUrl(
+        this.router.createUrlTree([item.route], { queryParams: item.queryParams })
+      );
+      return currentUrl === urlWithParams;
+    }
+
+    return currentUrl === item.route;
   }
 }

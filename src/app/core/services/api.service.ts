@@ -39,7 +39,7 @@ type ApiResponse<T> = {
 export class ApiService {
   private apiUrl = environment.apiBaseUrl;
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient) { }
 
   private getHeaders(): HttpHeaders {
     return new HttpHeaders({
@@ -119,7 +119,7 @@ export class ApiService {
    * Predice churn usando datos personalizados del modelo (datos editados por el usuario).
    * Transforma los datos del formulario al formato que espera el servicio de IA.
    */
-  predecirChurnConDatos(datosPersonalizados: any): Observable<any> {
+  predecirChurnConDatos(modeloInsumos: any): Observable<any> {
     console.log('═══════════════════════════════════════════════════════════');
     console.log('📡 LLAMADA AL ENDPOINT: predecirChurnConDatos');
     console.log('═══════════════════════════════════════════════════════════');

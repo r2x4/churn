@@ -1,11 +1,10 @@
-// src/app/features/admin/components/ofertas/oferta-table.component.ts
 
 import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Oferta } from '../../../../core/models/oferta.model';
+import { Servicio } from '../../../../core/models/servicio.model';
 
 @Component({
-  selector: 'app-oferta-table',
+  selector: 'app-servicio-table',
   standalone: true,
   imports: [CommonModule],
   template: `
@@ -13,47 +12,46 @@ import { Oferta } from '../../../../core/models/oferta.model';
       <table class="min-w-full divide-y divide-gray-200">
         <thead class="bg-gray-50">
           <tr>
-            <th class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Oferta</th>
-            <th class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Descripción</th>
-            <th class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Descuento</th>
-            <th class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Exclusiva Churn</th>
+            <th class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">ID</th>
+            <th class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Usuario</th>
+            <th class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Plan</th>
+            <th class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Contrato</th>
+            <th class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Estado</th>
             <th class="px-6 py-3 text-right text-xs font-semibold text-gray-500 uppercase tracking-wider">Acciones</th>
           </tr>
         </thead>
         <tbody class="bg-white divide-y divide-gray-200">
-          <tr *ngFor="let oferta of ofertaList" class="hover:bg-gray-50 transition-colors">
+          <tr *ngFor="let servicio of servicioList" class="hover:bg-gray-50 transition-colors">
             <td class="px-6 py-4 whitespace-nowrap">
-              <div class="text-sm font-bold text-gray-900">{{ oferta.nombre }}</div>
-            </td>
-            <td class="px-6 py-4">
-              <div class="text-sm text-gray-600 truncate max-w-xs">{{ oferta.descripcion }}</div>
+              <div class="text-sm text-gray-900">#{{ servicio.id }}</div>
             </td>
             <td class="px-6 py-4 whitespace-nowrap">
-              <span class="px-2 py-1 text-xs font-bold rounded-lg bg-green-100 text-green-700">
-                {{ oferta.descuentoPorcentaje }}%
+              <div class="text-sm font-medium text-gray-900">{{ servicio.idUsuario }}</div>
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap">
+              <div class="text-sm text-gray-700">{{ servicio.idPlan }}</div>
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap">
+              <div class="text-sm text-gray-700">{{ servicio.tipoContrato }}</div>
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap">
+              <span *ngIf="servicio.subscripcionActiva" class="px-2 py-1 text-xs font-bold rounded-lg bg-green-100 text-green-700">
+                Activa
               </span>
-            </td>
-            <td class="px-6 py-4 whitespace-nowrap">
-              <span *ngIf="oferta.esExclusivaChurn" class="inline-flex items-center px-2 py-1 text-xs font-medium rounded-full bg-red-100 text-red-700">
-                <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
-                </svg>
-                Sí
-              </span>
-              <span *ngIf="!oferta.esExclusivaChurn" class="px-2 py-1 text-xs font-medium rounded-full bg-gray-100 text-gray-700">
-                No
+              <span *ngIf="!servicio.subscripcionActiva" class="px-2 py-1 text-xs font-bold rounded-lg bg-red-100 text-red-700">
+                Inactiva
               </span>
             </td>
             <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
               <div class="flex justify-end gap-2">
-                <button (click)="onEdit.emit(oferta)" 
+                <button (click)="onEdit.emit(servicio)" 
                         title="Editar"
                         class="inline-flex items-center justify-center w-10 h-10 rounded-full bg-amber-50 text-amber-600 hover:bg-amber-100 hover:shadow-md transition-all">
                   <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
                   </svg>
                 </button>
-                <button (click)="onDelete.emit(oferta.id)" 
+                <button (click)="onDelete.emit(servicio.id)" 
                         title="Eliminar"
                         class="inline-flex items-center justify-center w-10 h-10 rounded-full bg-red-50 text-red-600 hover:bg-red-100 hover:shadow-md transition-all">
                   <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -63,14 +61,18 @@ import { Oferta } from '../../../../core/models/oferta.model';
               </div>
             </td>
           </tr>
+          <tr *ngIf="servicioList.length === 0">
+            <td colspan="6" class="px-6 py-10 text-center text-gray-500">
+              No se encontraron servicios
+            </td>
+          </tr>
         </tbody>
       </table>
     </div>
   `
 })
-export class OfertaTableComponent {
-  @Input() ofertaList: Oferta[] = [];
-
-  @Output() onEdit = new EventEmitter<Oferta>();
+export class ServicioTableComponent {
+  @Input() servicioList: Servicio[] = [];
+  @Output() onEdit = new EventEmitter<Servicio>();
   @Output() onDelete = new EventEmitter<number>();
 }

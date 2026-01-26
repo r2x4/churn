@@ -14,14 +14,28 @@
   </div>
 
   <!-- Navigation Menu -->
-  <nav class="flex-1 py-4">
+  <nav class="flex-1 py-4 overflow-y-auto custom-scrollbar">
     <ul>
-      <li *ngFor="let item of menuItems" (click)="navigate(item.route)"
-          class="nav-item"
-          [ngClass]="{ 'active': isActive(item.route), 'collapsed': isCollapsed }">
-        <div class="indicator"></div>
-        <i [class]="item.icon" class="icon"></i>
-        <span class="title" *ngIf="!isCollapsed">{{ item.title }}</span>
+      <li *ngFor="let item of menuItems" class="flex flex-col">
+        <div (click)="navigate(item)" class="nav-item"
+          [ngClass]="{ 'active': isActive(item), 'collapsed': isCollapsed }">
+          <div class="indicator"></div>
+          <i [class]="item.icon" class="icon"></i>
+          <span class="title" *ngIf="!isCollapsed">{{ item.title }}</span>
+
+          <!-- Expand/Collapse Icon -->
+          <i *ngIf="item.children && !isCollapsed" class="fas ml-auto mr-4 transition-transform duration-200"
+            [ngClass]="item.expanded ? 'fa-chevron-up' : 'fa-chevron-down'"></i>
+        </div>
+
+        <!-- Sub-menu -->
+        <ul *ngIf="item.children && item.expanded && !isCollapsed" class="bg-gray-900/50 py-2">
+          <li *ngFor="let child of item.children" (click)="navigate(child)" class="nav-item sub-item"
+            [ngClass]="{ 'active': isActive(child) }">
+            <i [class]="child.icon" class="icon text-xs"></i>
+            <span class="title text-sm" *ngIf="!isCollapsed">{{ child.title }}</span>
+          </li>
+        </ul>
       </li>
     </ul>
   </nav>

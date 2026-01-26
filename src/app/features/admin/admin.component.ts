@@ -23,12 +23,17 @@ import { PlanTableComponent } from './components/planes/plan-table.component';
 import { PlanFormComponent } from './components/planes/plan-form.component';
 import { OfertaTableComponent } from './components/ofertas/oferta-table.component';
 import { OfertaFormComponent } from './components/ofertas/oferta-form.component';
+import { ServicioTableComponent } from './components/servicios/servicio-table.component';
+import { ServicioFormComponent } from './components/servicios/servicio-form.component';
+import { Servicio, ServicioDto } from '../../core/models/servicio.model';
+import { ServicioService } from '../../core/services/servicio.service';
 import { ChurnPredictionComponent } from '../churn-prediction/churn-prediction.component';
+import { ActivatedRoute, Router } from '@angular/router';
 
 @Component({
   selector: 'app-admin',
   standalone: true,
-imports: [
+  imports: [
     CommonModule,
     ReactiveFormsModule,
     HistorialTableComponent,
@@ -42,6 +47,8 @@ imports: [
     PlanFormComponent,
     OfertaTableComponent,
     OfertaFormComponent,
+    ServicioTableComponent,
+    ServicioFormComponent,
     ChurnPredictionComponent
   ],
   templateUrl: './admin.component.html',
@@ -54,12 +61,15 @@ export class AdminComponent implements OnInit {
   historyList: HistorialPrediccion[] = [];
   isLoadingHistory: boolean = false;
   viewingDeleted: boolean = false;
+  historyPage: number = 0;
+  historySize: number = 10;
+  historyTotal: number = 0;
 
-// Variables para componentes Historial
+  // Variables para componentes Historial
   selectedHistory: HistorialPrediccion | null = null;
   showDetail: boolean = false;
 
-// Variables para componentes Usuarios
+  // Variables para componentes Usuarios
   userList: Usuario[] = [];
   isLoadingUsers: boolean = false;
   viewingDeletedUsers: boolean = false;
@@ -76,17 +86,25 @@ export class AdminComponent implements OnInit {
   confirmModalButtonText: string = 'Confirmar';
   pendingAction: (() => void) | null = null;
 
-// Variables para Planes
+  // Variables para Planes
   planList: Plan[] = [];
   isLoadingPlanes = false;
   selectedPlan: any = null;
   showPlanForm = false;
 
-// Variables para Ofertas
+  // Variables para Ofertas
   ofertaList: Oferta[] = [];
   isLoadingOfertas = false;
   selectedOferta: Oferta | null = null;
+
   showOfertaForm = false;
+
+  // Variables para Servicios
+  servicioList: Servicio[] = [];
+  isLoadingServicios = false;
+  viewingDeletedServicios = false;
+  selectedServicio: Servicio | null = null;
+  showServicioForm = false;
 
   constructor(
     private predictionService: PredictionService,
@@ -95,17 +113,35 @@ export class AdminComponent implements OnInit {
     private fb: FormBuilder,
     private apiService: ApiService,
     private planService: PlanService,
-    private ofertaService: OfertaService
+    private ofertaService: OfertaService,
+    private servicioService: ServicioService,
+    private route: ActivatedRoute,
+    private router: Router
   ) { }
 
   ngOnInit(): void {
+    this.route.queryParams.subscribe(params => {
+      if (params['tab']) {
+        this.selectTab(params['tab'], false);
+      } else {
+        this.selectTab('history', true);
+      }
+    });
   }
 
-
-
-  selectTab(tab: string): void {
+  selectTab(tab: string, updateUrl: boolean = true): void {
     this.selectedTab = tab;
+
+    if (updateUrl) {
+      this.router.navigate([], {
+        relativeTo: this.route,
+        queryParams: { tab: tab },
+        queryParamsHandling: 'merge'
+      });
+    }
+
     if (tab === 'history') {
+      this.historyPage = 0;
       this.loadHistory();
     } else if (tab === 'users') {
       this.loadUsers();
@@ -113,23 +149,28 @@ export class AdminComponent implements OnInit {
       this.loadPlanes();
     } else if (tab === 'ofertas') {
       this.loadOfertas();
+    } else if (tab === 'servicios') {
+      this.loadServicios();
     }
   }
 
   loadHistory(): void {
     this.isLoadingHistory = true;
     const request = this.viewingDeleted
-      ? this.historialService.listarEliminados(0, 50)
-      : this.historialService.listarActivos(0, 50);
+      ? this.historialService.listarEliminados(this.historyPage, this.historySize)
+      : this.historialService.listarActivos(this.historyPage, this.historySize);
 
     request.subscribe({
       next: (response) => {
         if (response.data && (response.data as any).content) {
           this.historyList = (response.data as any).content;
+          this.historyTotal = (response.data as any).totalElements || 0;
         } else if (Array.isArray(response.data)) {
           this.historyList = response.data;
+          this.historyTotal = response.data.length;
         } else {
           this.historyList = [];
+          this.historyTotal = 0;
         }
         this.isLoadingHistory = false;
       },
@@ -137,12 +178,19 @@ export class AdminComponent implements OnInit {
         console.error('Error al cargar historial:', error);
         this.isLoadingHistory = false;
         this.historyList = [];
+        this.historyTotal = 0;
       }
     });
   }
 
+  onHistoryPageChange(page: number): void {
+    this.historyPage = page;
+    this.loadHistory();
+  }
+
   toggleDeleted(): void {
     this.viewingDeleted = !this.viewingDeleted;
+    this.historyPage = 0;
     this.loadHistory();
   }
 
@@ -153,12 +201,12 @@ export class AdminComponent implements OnInit {
     this.showDetail = true;
   }
 
-closeDetail(): void {
+  closeDetail(): void {
     this.showDetail = false;
     this.selectedHistory = null;
   }
 
-  
+
 
 
 
@@ -194,7 +242,7 @@ closeDetail(): void {
     this.loadUsers();
   }
 
-viewUserDetail(id: string): void {
+  viewUserDetail(id: string): void {
     this.usuarioService.buscarPorId(id).subscribe(res => {
       this.selectedUser = res.data;
       this.showUserDetail = true;
@@ -332,7 +380,7 @@ viewUserDetail(id: string): void {
 
   // ================= PLANES LOGIC =================
 
-loadPlanes(): void {
+  loadPlanes(): void {
     this.isLoadingPlanes = true;
     this.planService.listar(0, 100).subscribe({
       next: (res) => {
@@ -411,7 +459,7 @@ loadPlanes(): void {
 
   // ================= OFERTAS LOGIC =================
 
-loadOfertas(): void {
+  loadOfertas(): void {
     this.isLoadingOfertas = true;
     this.ofertaService.listar().subscribe({
       next: (res) => {
@@ -475,6 +523,93 @@ loadOfertas(): void {
     this.pendingAction = () => {
       this.ofertaService.eliminar(id).subscribe(() => {
         this.loadOfertas();
+      });
+    };
+    this.showConfirmModal = true;
+  }
+
+  // ================= SERVICIOS LOGIC =================
+
+  loadServicios(): void {
+    this.isLoadingServicios = true;
+    const request = this.viewingDeletedServicios
+      ? this.servicioService.listarEliminados(0, 50)
+      : this.servicioService.listar(0, 50);
+
+    request.subscribe({
+      next: (res) => {
+        if (res.data && (res.data as any).content) {
+          this.servicioList = (res.data as any).content;
+        } else if (Array.isArray(res.data)) {
+          this.servicioList = res.data;
+        } else {
+          this.servicioList = [];
+        }
+        this.isLoadingServicios = false;
+      },
+      error: (err) => {
+        console.error('Error loading servicios:', err);
+        this.isLoadingServicios = false;
+        this.servicioList = [];
+      }
+    });
+  }
+
+  toggleDeletedServicios(): void {
+    this.viewingDeletedServicios = !this.viewingDeletedServicios;
+    this.loadServicios();
+  }
+
+  openCreateServicioForm(): void {
+    // Ensure dependencies are loaded
+    if (this.userList.length === 0) this.loadUsers();
+    if (this.planList.length === 0) this.loadPlanes();
+
+    this.selectedServicio = null;
+    this.showServicioForm = true;
+  }
+
+  openEditServicioForm(servicio: Servicio): void {
+    // Ensure dependencies are loaded
+    if (this.userList.length === 0) this.loadUsers();
+    if (this.planList.length === 0) this.loadPlanes();
+
+    this.selectedServicio = servicio;
+    this.showServicioForm = true;
+  }
+
+  saveServicio(dto: ServicioDto): void {
+    const request = this.selectedServicio
+      ? this.servicioService.editar(this.selectedServicio.id, dto)
+      : this.servicioService.crear(dto);
+
+    request.subscribe({
+      next: () => {
+        this.confirmModalTitle = 'Éxito';
+        this.confirmModalMessage = this.selectedServicio ? 'Servicio actualizado correctamente' : 'Servicio creado correctamente';
+        this.confirmModalType = 'success';
+        this.confirmModalButtonText = 'Aceptar';
+        this.pendingAction = () => {
+          this.showServicioForm = false;
+          this.loadServicios();
+        };
+        this.showConfirmModal = true;
+      },
+      error: (err) => {
+        console.error('Error saving servicio:', err);
+        // Could handle error feedback here too
+      }
+    });
+  }
+
+  deleteServicio(id: number): void {
+    this.confirmModalTitle = 'Eliminar Servicio';
+    this.confirmModalMessage = '¿Estás seguro de que deseas eliminar este servicio?';
+    this.confirmModalType = 'danger';
+    this.confirmModalButtonText = 'Eliminar';
+    this.pendingAction = () => {
+      this.servicioService.eliminar(id).subscribe(() => {
+        this.loadServicios();
       });
     };
     this.showConfirmModal = true;
