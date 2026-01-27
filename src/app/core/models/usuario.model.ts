@@ -1,21 +1,38 @@
 // src/app/core/models/usuario.model.ts
 
-export interface Rol {
-    id: number;
-    nombre: string;
-}
+import { Rol } from './rol.model';
 
 export interface Usuario {
     id: string;
-    username: string;
+    nombre: string;
+    papellido: string;
+    sapellido: string;
+    pApellido?: string; // Possible backend camelCase
+    sApellido?: string; // Possible backend camelCase
     email: string;
-    activo: boolean;
+    telefono: string;
+    fechaNacimiento: string;
+    genero: string;  // Backend devuelve "Masculino" no "MASCULINO"
+    tieneConyuge: boolean;
+    tieneDependientes: boolean;
+    activo?: boolean;  // Opcional porque el backend usa isEnabled
+    isEnabled?: boolean;  // Campo adicional del backend
     roles: Rol[];
 }
 
 export interface UsuarioDto {
-    username: string;
+    id?: string;
+    nombre: string;
+    papellido: string;  // Backend espera en minúsculas
+    sapellido: string;  // Backend espera en minúsculas
     email: string;
     password?: string;
+    telefono: string;
+    fechaNacimiento: string;
+    genero: string;
+    tieneConyuge: boolean;
+    tieneDependientes: boolean;
     roles?: number[]; // IDs de los roles
+    pApellido?: string;
+    sApellido?: string;
 }

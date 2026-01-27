@@ -4,7 +4,7 @@ import { Component, OnInit, AfterViewInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ApiService } from '../../core/services/api.service';
 import { CompanyStatistics, ChurnByCategory, RevenueStats } from '../../core/models/customer.model';
-import Chart from 'chart.js/auto'; // Import Chart.js
+import Chart, { ArcElement } from 'chart.js/auto'; // Import Chart.js
 
 @Component({
   selector: 'app-dashboard',
@@ -18,6 +18,7 @@ export class DashboardComponent implements OnInit, AfterViewInit {
   churnByContract: ChurnByCategory[] = [];
   monthlyRevenue: RevenueStats[] = [];
   churnByInternetService: ChurnByCategory[] = [];
+  churnByGender: ChurnByCategory[] = [];
 
   constructor(private apiService: ApiService) {}
 
@@ -39,6 +40,11 @@ export class DashboardComponent implements OnInit, AfterViewInit {
     this.apiService.getChurnByCategory('InternetService').subscribe(data => {
       this.churnByInternetService = data;
       this.createChurnByInternetServiceChart();
+    });
+
+    this.apiService.getChurnByCategory('gender').subscribe(data => {
+      this.churnByGender = data;
+      this.createChurnByGenderChart();
     });
   }
 
@@ -187,6 +193,88 @@ export class DashboardComponent implements OnInit, AfterViewInit {
             title: {
               display: true,
               text: 'Churn by Internet Service Type'
+            },
+          }
+        },
+        plugins: [{
+          id: 'customDatalabels',
+          afterDraw: (chart) => {
+            const ctx = chart.ctx;
+            ctx.save();
+            ctx.font = 'bold 12px sans-serif';
+            ctx.fillStyle = '#fff';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+
+            const arcs = chart.getDatasetMeta(0).data;
+            arcs.forEach((element: any, index: number) => {
+              const arc = element as ArcElement;
+              const data = chart.data.datasets[0].data[index] as number;
+              if (data) {
+                const angle = (arc.startAngle + arc.endAngle) / 2;
+                const radius = (arc.outerRadius + arc.innerRadius) / 2;
+                const x = arc.x + Math.cos(angle) * radius;
+                const y = arc.y + Math.sin(angle) * radius;
+
+                ctx.fillText(`${data.toFixed(1)}%`, x, y);
+              }
+            });
+            ctx.restore();
+          }
+        }]
+      });
+    }
+  }
+
+  createChurnByGenderChart(): void {
+    const canvas = document.getElementById('churnByPaymentMethodChart') as HTMLCanvasElement; // Keep same canvas ID for now
+    if (!canvas) {
+      console.error('Canvas element with ID "churnByPaymentMethodChart" not found.');
+      return;
+    }
+
+    const ctx = canvas.getContext('2d');
+    if (ctx) {
+      const labels = this.churnByGender.map(item => item.value);
+      const churnData = this.churnByGender.map(item => item.churnRate);
+
+      new Chart(ctx, {
+        type: 'bar', // Using bar chart for gender comparison
+        data: {
+          labels: labels,
+          datasets: [{
+            label: 'Churn Rate (%)',
+            data: churnData,
+            backgroundColor: [
+              'rgba(54, 162, 235, 0.6)', // Blue for Male
+              'rgba(255, 99, 132, 0.6)'  // Red for Female
+            ],
+            borderColor: [
+              'rgba(54, 162, 235, 1)',
+              'rgba(255, 99, 132, 1)'
+            ],
+            borderWidth: 1
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          scales: {
+            y: {
+              beginAtZero: true,
+              title: {
+                display: true,
+                text: 'Churn Rate (%)'
+              }
+            }
+          },
+          plugins: {
+            legend: {
+              display: false
+            },
+            title: {
+              display: true,
+              text: 'Churn Rate by Gender'
             }
           }
         }

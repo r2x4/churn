@@ -1,238 +1,341 @@
 <!-- src/app/features/churn-prediction/churn-prediction.component.html -->
 <div class="p-6 bg-gray-50 min-h-screen">
-  <div class="max-w-7xl mx-auto">
+  <div class="max-w-6xl mx-auto">
     <!-- Header -->
     <div class="mb-8">
-      <h1 class="text-3xl font-bold text-gray-800 flex items-center">
-        <i class="fas fa-user-slash mr-3 text-blue-500"></i>
-        <span>Predicción de Churn</span>
+      <h1 class="text-4xl font-bold text-gray-900 flex items-center gap-3">
+        🎯 Predicción de Churn
       </h1>
-      <p class="mt-1 text-gray-500">Predice si un cliente abandonará el servicio basado en sus características.</p>
+      <p class="mt-2 text-gray-600">Selecciona un usuario y revisa/edita sus datos para evaluar su riesgo de abandono.</p>
     </div>
 
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-      <!-- Form Card -->
-      <div class="lg:col-span-2 bg-white p-8 rounded-xl shadow-md">
-        <form [formGroup]="predictionForm" (ngSubmit)="onSubmit()">
-          
-          <!-- Personal Info -->
-          <div class="mb-8">
-            <h3 class="text-xl font-semibold text-gray-700 mb-4 border-b pb-2 flex items-center">
-              <i class="fas fa-user mr-2 text-gray-400"></i> Información Personal
-            </h3>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
-                <label class="block text-sm font-medium text-gray-600 mb-1">ID Cliente (Opcional)</label>
-                <input type="text" formControlName="customerID" placeholder="Documento de Identidad" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500">
-              </div>
-              <div>
-                <label class="block text-sm font-medium text-gray-600 mb-1">Género *</label>
-                <select formControlName="gender" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500">
-                  <option *ngFor="let option of genderOptions" [value]="option">{{ option }}</option>
-                </select>
-              </div>
-              <div>
-                <label class="block text-sm font-medium text-gray-600 mb-1">Ciudadano Mayor *</label>
-                <select formControlName="SeniorCitizen" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500">
-                  <option [value]="0">No</option>
-                  <option [value]="1">Sí</option>
-                </select>
-              </div>
-              <div>
-                <label class="block text-sm font-medium text-gray-600 mb-1">Tiene Pareja *</label>
-                <select formControlName="Partner" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500">
-                  <option *ngFor="let option of yesNoOptions" [value]="option">{{ option }}</option>
-                </select>
-              </div>
-              <div>
-                <label class="block text-sm font-medium text-gray-600 mb-1">Tiene Dependientes *</label>
-                <select formControlName="Dependents" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500">
-                  <option *ngFor="let option of yesNoOptions" [value]="option">{{ option }}</option>
-                </select>
-              </div>
-              <div>
-                <label class="block text-sm font-medium text-gray-600 mb-1">Permanencia (meses) *</label>
-                <input type="number" formControlName="tenure" min="0" placeholder="Ej: 12" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500">
-              </div>
-            </div>
-          </div>
+    <!-- Search Section -->
+    <div class="bg-white rounded-2xl shadow-lg p-8 mb-8">
+      <h2 class="text-2xl font-bold text-gray-900 mb-6 flex items-center gap-2">
+        📱 Seleccionar Usuario
+      </h2>
 
-          <!-- Services -->
-          <div class="mb-8">
-            <h3 class="text-xl font-semibold text-gray-700 mb-4 border-b pb-2 flex items-center">
-              <i class="fas fa-wifi mr-2 text-gray-400"></i> Servicios Contratados
-            </h3>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
-                <label class="block text-sm font-medium text-gray-600 mb-1">Servicio Telefónico *</label>
-                <select formControlName="PhoneService" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500">
-                  <option *ngFor="let option of yesNoOptions" [value]="option">{{ option }}</option>
-                </select>
-              </div>
-              <div>
-                <label class="block text-sm font-medium text-gray-600 mb-1">Múltiples Líneas *</label>
-                <select formControlName="MultipleLines" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500">
-                  <option *ngFor="let option of yesNoOptions" [value]="option">{{ option }}</option>
-                  <option value="No phone service">Sin servicio telefónico</option>
-                </select>
-              </div>
-              <div>
-                <label class="block text-sm font-medium text-gray-600 mb-1">Servicio Internet *</label>
-                <select formControlName="InternetService" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500">
-                  <option *ngFor="let option of internetServiceOptions" [value]="option">{{ option }}</option>
-                </select>
-              </div>
-              <div>
-                <label class="block text-sm font-medium text-gray-600 mb-1">Seguridad Online *</label>
-                <select formControlName="OnlineSecurity" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500">
-                  <option *ngFor="let option of yesNoOptions" [value]="option">{{ option }}</option>
-                  <option value="No internet service">Sin servicio internet</option>
-                </select>
-              </div>
-              <div>
-                <label class="block text-sm font-medium text-gray-600 mb-1">Respaldo Online *</label>
-                <select formControlName="OnlineBackup" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500">
-                  <option *ngFor="let option of yesNoOptions" [value]="option">{{ option }}</option>
-                  <option value="No internet service">Sin servicio internet</option>
-                </select>
-              </div>
-              <div>
-                <label class="block text-sm font-medium text-gray-600 mb-1">Protección Dispositivo *</label>
-                <select formControlName="DeviceProtection" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500">
-                  <option *ngFor="let option of yesNoOptions" [value]="option">{{ option }}</option>
-                  <option value="No internet service">Sin servicio internet</option>
-                </select>
-              </div>
-              <div>
-                <label class="block text-sm font-medium text-gray-600 mb-1">Soporte Técnico *</label>
-                <select formControlName="TechSupport" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500">
-                  <option *ngFor="let option of yesNoOptions" [value]="option">{{ option }}</option>
-                  <option value="No internet service">Sin servicio internet</option>
-                </select>
-              </div>
-              <div>
-                <label class="block text-sm font-medium text-gray-600 mb-1">Streaming TV *</label>
-                <select formControlName="StreamingTV" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500">
-                  <option *ngFor="let option of yesNoOptions" [value]="option">{{ option }}</option>
-                  <option value="No internet service">Sin servicio internet</option>
-                </select>
-              </div>
-              <div>
-                <label class="block text-sm font-medium text-gray-600 mb-1">Streaming Películas *</label>
-                <select formControlName="StreamingMovies" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500">
-                  <option *ngFor="let option of yesNoOptions" [value]="option">{{ option }}</option>
-                  <option value="No internet service">Sin servicio internet</option>
-                </select>
-              </div>
-            </div>
-          </div>
-
-          <!-- Contract and Payments -->
-          <div class="mb-8">
-            <h3 class="text-xl font-semibold text-gray-700 mb-4 border-b pb-2 flex items-center">
-              <i class="fas fa-file-contract mr-2 text-gray-400"></i> Contrato y Pagos
-            </h3>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
-                <label class="block text-sm font-medium text-gray-600 mb-1">Tipo de Contrato *</label>
-                <select formControlName="Contract" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500">
-                  <option *ngFor="let option of contractOptions" [value]="option">{{ option }}</option>
-                </select>
-              </div>
-              <div>
-                <label class="block text-sm font-medium text-gray-600 mb-1">Facturación sin Papel *</label>
-                <select formControlName="PaperlessBilling" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500">
-                  <option *ngFor="let option of yesNoOptions" [value]="option">{{ option }}</option>
-                </select>
-              </div>
-              <div>
-                <label class="block text-sm font-medium text-gray-600 mb-1">Método de Pago *</label>
-                <select formControlName="PaymentMethod" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500">
-                  <option *ngFor="let option of paymentMethodOptions" [value]="option">{{ option }}</option>
-                </select>
-              </div>
-              <div>
-                <label class="block text-sm font-medium text-gray-600 mb-1">Cargo Mensual ($) *</label>
-                <input type="number" formControlName="MonthlyCharges" min="0" step="0.01" placeholder="Ej: 85.50" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500">
-              </div>
-              <div>
-                <label class="block text-sm font-medium text-gray-600 mb-1">Total Acumulado ($) *</label>
-                <input type="number" formControlName="TotalCharges" min="0" step="0.01" placeholder="Ej: 1026.00" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500">
-              </div>
-            </div>
-          </div>
-
-          <!-- Actions -->
-          <div class="flex justify-end space-x-4 mt-8">
-            <button type="button" (click)="resetForm()" class="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-100 transition">
-              <i class="fas fa-redo mr-2"></i> Limpiar
-            </button>
-            <button type="submit" [disabled]="isLoading" class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition disabled:bg-blue-300">
-              <i class="fas fa-chart-line mr-2"></i>
-              {{ isLoading ? 'Procesando...' : 'Predecir Churn' }}
+      <form [formGroup]="searchForm" (ngSubmit)="searchUsuario()" class="space-y-6">
+        <div>
+          <label class="block text-sm font-semibold text-gray-700 mb-2">ID del Usuario</label>
+          <div class="flex gap-2">
+            <select formControlName="usuarioId" 
+                    class="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none">
+              <option value="">-- Seleccionar usuario --</option>
+              <option *ngFor="let usr of usuarios" [value]="usr.id">
+                {{ usr.id }} - {{ usr.nombre }}
+              </option>
+            </select>
+            <button type="submit" [disabled]="isSearching || !searchForm.valid"
+                    class="px-8 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition disabled:bg-gray-400 disabled:cursor-not-allowed font-semibold flex items-center gap-2">
+              <span *ngIf="!isSearching">🔍</span>
+              <span *ngIf="isSearching">⏳</span>
+              {{ isSearching ? 'Buscando...' : 'Buscar' }}
             </button>
           </div>
-        </form>
-      </div>
-
-      <!-- Result Card -->
-      <div class="lg:col-span-1">
-        <div *ngIf="!showResult" class="bg-white p-8 rounded-xl shadow-md text-center h-full flex flex-col justify-center">
-          <i class="fas fa-chart-line text-5xl text-gray-300 mb-4"></i>
-          <h3 class="text-lg font-semibold text-gray-700">Completa el formulario</h3>
-          <p class="text-gray-500 mt-1">Los resultados de la predicción aparecerán aquí.</p>
+          <div *ngIf="searchError" class="mt-3 bg-red-50 border border-red-200 text-red-800 px-4 py-3 rounded-lg text-sm">
+            ❌ {{ searchError }}
+          </div>
         </div>
+      </form>
+    </div>
 
-        <div *ngIf="showResult && predictionResult" class="bg-white p-8 rounded-xl shadow-md">
-          <h2 class="text-xl font-semibold text-gray-800 mb-4">Resultado de la Predicción</h2>
-
-          <!-- Risk Indicator -->
-          <div class="text-center mb-6">
-            <div class="inline-block rounded-full p-4" [ngClass]="{
-              'bg-red-100': predictionResult.riskLevel === 'high',
-              'bg-yellow-100': predictionResult.riskLevel === 'medium',
-              'bg-green-100': predictionResult.riskLevel === 'low'
-            }">
-              <i class="fas text-4xl" [ngClass]="{
-                'fa-exclamation-triangle text-red-500': predictionResult.riskLevel === 'high',
-                'fa-exclamation-circle text-yellow-500': predictionResult.riskLevel === 'medium',
-                'fa-check-circle text-green-500': predictionResult.riskLevel === 'low'
-              }"></i>
-            </div>
-            <h3 class="text-2xl font-bold mt-2" [ngClass]="{
-              'text-red-600': predictionResult.riskLevel === 'high',
-              'text-yellow-600': predictionResult.riskLevel === 'medium',
-              'text-green-600': predictionResult.riskLevel === 'low'
-            }">{{ getRiskLabel() }}</h3>
-            <p class="text-gray-600">Probabilidad de Churn: <strong>{{ (predictionResult.churnProbability * 100).toFixed(1) }}%</strong></p>
+    <!-- Datos del Usuario y Formulario de Modelo -->
+    <div *ngIf="selectedUsuario && showModeloForm" class="bg-white rounded-2xl shadow-lg p-8 mb-8">
+      <div class="mb-8 pb-8 border-b border-gray-200">
+        <h2 class="text-2xl font-bold text-gray-900 mb-6 flex items-center gap-2">
+          👤 Información del Usuario
+        </h2>
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <div class="bg-indigo-50 p-4 rounded-lg">
+            <p class="text-sm text-gray-600 font-semibold">ID Usuario</p>
+            <p class="text-lg font-bold text-gray-900">{{ selectedUsuario.id }}</p>
           </div>
-
-          <!-- Info -->
-          <div class="space-y-3 text-sm">
-            <div class="flex justify-between items-center">
-              <span class="text-gray-500">Cliente ID:</span>
-              <span class="font-semibold text-gray-800">{{ predictionResult.customerID }}</span>
-            </div>
-            <div class="flex justify-between items-center">
-              <span class="text-gray-500">¿Abandonará el servicio?:</span>
-              <span class="px-2 py-1 text-xs font-bold rounded-full" [ngClass]="predictionResult.willChurn ? 'bg-red-500 text-white' : 'bg-green-500 text-white'">
-                {{ predictionResult.willChurn ? 'SÍ' : 'NO' }}
-              </span>
-            </div>
+          <div class="bg-indigo-50 p-4 rounded-lg" *ngIf="modeloInsumos?.idCliente">
+            <p class="text-sm text-gray-600 font-semibold">ID Cliente (Modelo)</p>
+            <p class="text-lg font-bold text-gray-900">{{ modeloInsumos?.idCliente }}</p>
           </div>
-
-          <!-- Recommendations -->
-          <div class="mt-8" *ngIf="predictionResult.recommendations?.length">
-            <h4 class="font-semibold text-gray-700 mb-2 flex items-center"><i class="fas fa-lightbulb mr-2 text-yellow-400"></i> Recomendaciones</h4>
-            <ul class="space-y-2">
-              <li *ngFor="let rec of predictionResult.recommendations" class="flex items-start">
-                <i class="fas fa-check text-green-500 mt-1 mr-2"></i>
-                <span class="text-gray-600">{{ rec }}</span>
-              </li>
-            </ul>
+          <div class="bg-indigo-50 p-4 rounded-lg">
+            <p class="text-sm text-gray-600 font-semibold">Nombre</p>
+            <p class="text-lg font-bold text-gray-900">{{ selectedUsuario.nombre }}</p>
+          </div>
+          <div class="bg-indigo-50 p-4 rounded-lg">
+            <p class="text-sm text-gray-600 font-semibold">Apellido</p>
+            <p class="text-lg font-bold text-gray-900">{{ selectedUsuario.papellido }}</p>
+          </div>
+          <div class="bg-indigo-50 p-4 rounded-lg">
+            <p class="text-sm text-gray-600 font-semibold">Email</p>
+            <p class="text-lg font-bold text-gray-900">{{ selectedUsuario.email }}</p>
           </div>
         </div>
       </div>
+
+      <!-- Formulario de Datos del Modelo -->
+      <form [formGroup]="modeloForm" class="space-y-8">
+        <div class="flex items-center justify-between mb-4">
+          <h3 class="text-xl font-bold text-gray-900 flex items-center gap-2">
+            📊 Datos del Modelo
+          </h3>
+          <span class="text-sm text-indigo-600 bg-indigo-50 px-3 py-1 rounded-full font-semibold">
+            ✏️ Puedes editar estos datos antes de predecir
+          </span>
+        </div>
+
+        <!-- Información Demográfica -->
+        <div class="bg-gray-50 p-6 rounded-lg">
+          <h4 class="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">👥 Información Demográfica</h4>
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+<div>
+              <label class="block text-sm font-semibold text-gray-700 mb-2">Género</label>
+              <select formControlName="gender" 
+                      class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500"
+                      [ngClass]="{
+                        'border-gray-300': !modeloForm.get('gender')?.invalid || !modeloForm.get('gender')?.touched,
+                        'border-red-500': modeloForm.get('gender')?.invalid && modeloForm.get('gender')?.touched
+                      }">
+                <option value="">-- Seleccionar --</option>
+                <option *ngFor="let opt of genderOptions" [value]="opt">{{ opt }}</option>
+              </select>
+              <div *ngIf="modeloForm.get('gender')?.invalid && modeloForm.get('gender')?.touched" 
+                   class="mt-1 text-sm text-red-600">
+                <span *ngIf="modeloForm.get('gender')?.errors?.['required']">El género es requerido</span>
+                <span *ngIf="modeloForm.get('gender')?.errors?.['generoInvalido']">Género inválido. Use Male o Female</span>
+              </div>
+            </div>
+<div>
+              <label class="block text-sm font-semibold text-gray-700 mb-2">Senior Citizen</label>
+              <select formControlName="seniorCitizen" 
+                      class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500"
+                      [ngClass]="{
+                        'border-gray-300': !modeloForm.get('seniorCitizen')?.invalid || !modeloForm.get('seniorCitizen')?.touched,
+                        'border-red-500': modeloForm.get('seniorCitizen')?.invalid && modeloForm.get('seniorCitizen')?.touched
+                      }">
+                <option value="">-- Seleccionar --</option>
+                <option *ngFor="let opt of yesNoOptions" [value]="opt">{{ opt }}</option>
+              </select>
+              <div *ngIf="modeloForm.get('seniorCitizen')?.invalid && modeloForm.get('seniorCitizen')?.touched" 
+                   class="mt-1 text-sm text-red-600">
+                <span *ngIf="modeloForm.get('seniorCitizen')?.errors?.['required']">Este campo es requerido</span>
+                <span *ngIf="modeloForm.get('seniorCitizen')?.errors?.['yesNoInvalido']">Use Yes o No</span>
+              </div>
+            </div>
+            <div>
+              <label class="block text-sm font-semibold text-gray-700 mb-2">Tiene Pareja</label>
+              <select formControlName="partner" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500">
+                <option value="">-- Seleccionar --</option>
+                <option *ngFor="let opt of yesNoOptions" [value]="opt">{{ opt }}</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-sm font-semibold text-gray-700 mb-2">Dependientes</label>
+              <select formControlName="dependents" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500">
+                <option value="">-- Seleccionar --</option>
+                <option *ngFor="let opt of yesNoOptions" [value]="opt">{{ opt }}</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-sm font-semibold text-gray-700 mb-2">Permanencia (meses)</label>
+              <input type="number" formControlName="tenure" min="0" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500">
+            </div>
+          </div>
+        </div>
+
+        <!-- Servicios Telefónicos -->
+        <div class="bg-gray-50 p-6 rounded-lg">
+          <h4 class="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">☎️ Servicios Telefónicos</h4>
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div>
+              <label class="block text-sm font-semibold text-gray-700 mb-2">Servicio Telefónico</label>
+              <select formControlName="phoneService" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500">
+                <option value="">-- Seleccionar --</option>
+                <option *ngFor="let opt of yesNoOptions" [value]="opt">{{ opt }}</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-sm font-semibold text-gray-700 mb-2">Múltiples Líneas</label>
+              <select formControlName="multipleLines" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500">
+                <option value="">-- Seleccionar --</option>
+                <option *ngFor="let opt of yesNoOptions" [value]="opt">{{ opt }}</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <!-- Servicios de Internet -->
+        <div class="bg-gray-50 p-6 rounded-lg">
+          <h4 class="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">🌐 Servicios de Internet</h4>
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div>
+              <label class="block text-sm font-semibold text-gray-700 mb-2">Tipo de Internet</label>
+              <select formControlName="internetService" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500">
+                <option value="">-- Seleccionar --</option>
+                <option *ngFor="let opt of internetServiceOptions" [value]="opt">{{ opt }}</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-sm font-semibold text-gray-700 mb-2">Seguridad Online</label>
+              <select formControlName="onlineSecurity" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500">
+                <option value="">-- Seleccionar --</option>
+                <option *ngFor="let opt of yesNoOptions" [value]="opt">{{ opt }}</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-sm font-semibold text-gray-700 mb-2">Respaldo Online</label>
+              <select formControlName="onlineBackup" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500">
+                <option value="">-- Seleccionar --</option>
+                <option *ngFor="let opt of yesNoOptions" [value]="opt">{{ opt }}</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-sm font-semibold text-gray-700 mb-2">Protección de Dispositivo</label>
+              <select formControlName="deviceProtection" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500">
+                <option value="">-- Seleccionar --</option>
+                <option *ngFor="let opt of yesNoOptions" [value]="opt">{{ opt }}</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-sm font-semibold text-gray-700 mb-2">Soporte Técnico</label>
+              <select formControlName="techSupport" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500">
+                <option value="">-- Seleccionar --</option>
+                <option *ngFor="let opt of yesNoOptions" [value]="opt">{{ opt }}</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-sm font-semibold text-gray-700 mb-2">Streaming TV</label>
+              <select formControlName="streamingTV" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500">
+                <option value="">-- Seleccionar --</option>
+                <option *ngFor="let opt of yesNoOptions" [value]="opt">{{ opt }}</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-sm font-semibold text-gray-700 mb-2">Streaming Películas</label>
+              <select formControlName="streamingMovies" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500">
+                <option value="">-- Seleccionar --</option>
+                <option *ngFor="let opt of yesNoOptions" [value]="opt">{{ opt }}</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <!-- Contrato y Pagos -->
+        <div class="bg-gray-50 p-6 rounded-lg">
+          <h4 class="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">💳 Contrato y Pagos</h4>
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div>
+              <label class="block text-sm font-semibold text-gray-700 mb-2">Tipo de Contrato</label>
+              <select formControlName="contract" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500">
+                <option value="">-- Seleccionar --</option>
+                <option *ngFor="let opt of contractOptions" [value]="opt">{{ opt }}</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-sm font-semibold text-gray-700 mb-2">Facturación sin Papel</label>
+              <select formControlName="paperlessBilling" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500">
+                <option value="">-- Seleccionar --</option>
+                <option *ngFor="let opt of yesNoOptions" [value]="opt">{{ opt }}</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-sm font-semibold text-gray-700 mb-2">Método de Pago</label>
+              <select formControlName="paymentMethod" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500">
+                <option value="">-- Seleccionar --</option>
+                <option *ngFor="let opt of paymentMethodOptions" [value]="opt">{{ opt }}</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-sm font-semibold text-gray-700 mb-2">Cargo Mensual ($)</label>
+              <input type="number" formControlName="monthlyCharges" step="0.01" min="0" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500">
+            </div>
+            <div>
+              <label class="block text-sm font-semibold text-gray-700 mb-2">Total Acumulado ($)</label>
+              <input type="number" formControlName="totalCharges" step="0.01" min="0" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500">
+            </div>
+          </div>
+        </div>
+
+        <!-- Botones de Acción -->
+        <div class="flex gap-4 pt-6">
+          <button type="button" (click)="evaluarChurn()" [disabled]="isLoading || modeloForm.invalid"
+                  class="flex-1 px-6 py-4 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition disabled:bg-gray-400 disabled:cursor-not-allowed font-bold text-lg flex items-center justify-center gap-2">
+            <span *ngIf="!isLoading">⚡</span>
+            <span *ngIf="isLoading">⏳</span>
+            {{ isLoading ? 'Evaluando...' : 'Evaluar Churn' }}
+          </button>
+          <button type="button" (click)="resetForm()" class="px-8 py-4 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 transition font-semibold">
+            🔄 Limpiar
+          </button>
+        </div>
+      </form>
+    </div>
+
+    <!-- Results Section -->
+    <div *ngIf="showResult && predictionResult" class="bg-white rounded-2xl shadow-lg p-8">
+      <h2 class="text-2xl font-bold text-gray-900 mb-8 flex items-center gap-2">
+        📊 Resultado de Predicción
+      </h2>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        <!-- Risk Level Card -->
+        <div class="bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl p-6 border-2 border-gray-200">
+          <p class="text-sm text-gray-600 font-semibold mb-2">NIVEL DE RIESGO</p>
+          <p class="text-3xl font-bold">{{ getRiskLabel() }}</p>
+          <p class="text-sm text-gray-500 mt-2">
+            Probabilidad: {{ ((predictionResult.probabilidad || 0) * 100).toFixed(1) }}%
+          </p>
+        </div>
+
+        <!-- Churn Status Card -->
+        <div [ngClass]="predictionResult.churn || predictionResult.prevision === 'Churn' ? 'bg-gradient-to-br from-red-50 to-red-100 border-2 border-red-300' : 'bg-gradient-to-br from-green-50 to-green-100 border-2 border-green-300'"
+             class="rounded-xl p-6">
+          <p [ngClass]="predictionResult.churn || predictionResult.prevision === 'Churn' ? 'text-red-600' : 'text-green-600'"
+             class="text-sm font-semibold mb-2">
+            PREDICCIÓN
+          </p>
+          <p class="text-3xl font-bold">{{ getChurnLabel() }}</p>
+          <p [ngClass]="predictionResult.churn || predictionResult.prevision === 'Churn' ? 'text-red-700' : 'text-green-700'"
+             class="text-sm mt-2">
+            {{ predictionResult.churn || predictionResult.prevision === 'Churn' ? 'El cliente tiene alta probabilidad de abandonar' : 'El cliente probablemente seguirá' }}
+          </p>
+        </div>
+
+        <!-- ID Card -->
+        <div class="bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl p-6 border-2 border-blue-200">
+          <p class="text-sm text-blue-600 font-semibold mb-2">ID USUARIO</p>
+          <p class="text-2xl font-bold text-blue-900">{{ predictionResult.usuarioId }}</p>
+          <p class="text-sm text-blue-600 mt-2">
+            Evaluado: {{ predictionResult.createdAt | date:'short' }}
+          </p>
+        </div>
+      </div>
+
+      <!-- Additional Info -->
+      <div class="bg-gray-50 rounded-xl p-6 border border-gray-200">
+        <h3 class="text-lg font-bold text-gray-900 mb-4">📈 Detalles de Predicción</h3>
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <p class="text-sm text-gray-600 font-semibold">Probabilidad Exacta</p>
+            <p class="text-lg font-bold text-gray-900">{{ ((predictionResult.probabilidad || 0) * 100).toFixed(2) }}%</p>
+          </div>
+          <div>
+            <p class="text-sm text-gray-600 font-semibold">Estado</p>
+            <p class="text-lg font-bold text-indigo-600">{{ predictionResult.prevision }}</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="flex gap-4 mt-8">
+        <button (click)="resetForm()" class="flex-1 px-6 py-3 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 transition font-semibold">
+          🔄 Nueva Predicción
+        </button>
+      </div>
+    </div>
+
+    <!-- Empty State -->
+    <div *ngIf="!selectedUsuario" class="bg-white rounded-2xl shadow-lg p-16 text-center">
+      <div class="text-6xl mb-4">🎯</div>
+      <p class="text-xl text-gray-600 font-semibold">Selecciona un usuario para comenzar</p>
+      <p class="text-gray-500 mt-2">Elige un usuario de la lista anterior para ver y editar sus datos</p>
     </div>
   </div>
 </div>

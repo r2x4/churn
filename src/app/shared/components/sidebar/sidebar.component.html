@@ -1,5 +1,5 @@
 <!-- src/app/shared/components/sidebar/sidebar.component.html -->
-<aside class="bg-gray-800 text-white h-screen flex flex-col transition-all duration-300"
+<aside class="bg-gradient-to-b from-gray-800 to-gray-900 text-white h-screen flex flex-col transition-all duration-300"
   [ngClass]="isCollapsed ? 'w-20' : 'w-64'">
   <!-- Logo/Header -->
   <div class="flex items-center justify-between p-4 border-b border-gray-700">
@@ -14,13 +14,28 @@
   </div>
 
   <!-- Navigation Menu -->
-  <nav class="flex-1 py-4">
+  <nav class="flex-1 py-4 overflow-y-auto custom-scrollbar">
     <ul>
-      <li *ngFor="let item of menuItems" (click)="navigate(item.route)"
-        class="flex items-center px-4 py-3 cursor-pointer hover:bg-gray-700 rounded-md mx-2 transition-colors duration-200"
-        [ngClass]="isActive(item.route) ? 'bg-blue-600' : ''">
-        <i [class]="item.icon" class="text-lg w-8 text-center"></i>
-        <span class="ml-4 font-medium" *ngIf="!isCollapsed">{{ item.title }}</span>
+      <li *ngFor="let item of menuItems" class="flex flex-col">
+        <div (click)="navigate(item)" class="nav-item"
+          [ngClass]="{ 'active': isActive(item), 'collapsed': isCollapsed }">
+          <div class="indicator"></div>
+          <i [class]="item.icon" class="icon"></i>
+          <span class="title" *ngIf="!isCollapsed">{{ item.title }}</span>
+
+          <!-- Expand/Collapse Icon -->
+          <i *ngIf="item.children && !isCollapsed" class="fas ml-auto mr-4 transition-transform duration-200"
+            [ngClass]="item.expanded ? 'fa-chevron-up' : 'fa-chevron-down'"></i>
+        </div>
+
+        <!-- Sub-menu -->
+        <ul *ngIf="item.children && item.expanded && !isCollapsed" class="bg-gray-900/50 py-2">
+          <li *ngFor="let child of item.children" (click)="navigate(child)" class="nav-item sub-item"
+            [ngClass]="{ 'active': isActive(child) }">
+            <i [class]="child.icon" class="icon text-xs"></i>
+            <span class="title text-sm" *ngIf="!isCollapsed">{{ child.title }}</span>
+          </li>
+        </ul>
       </li>
     </ul>
   </nav>
@@ -33,4 +48,10 @@
       <span class="font-medium text-sm" *ngIf="!isCollapsed">Cerrar Sesión</span>
     </div>
   </div>
+
+  <!-- Modal de Confirmación de Cierre de Sesión -->
+  <app-confirm-modal *ngIf="showLogoutModal" title="Cerrar Sesión"
+    message="¿Estás seguro de que deseas cerrar la sesión?" confirmText="Cerrar Sesión" type="info"
+    (onConfirm)="confirmLogout()" (onCancel)="cancelLogout()">
+  </app-confirm-modal>
 </aside>

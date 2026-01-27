@@ -1,1 +1,134 @@
-/* Styles are now handled by Tailwind CSS */
+.nav-item {
+  position: relative;
+  display: flex;
+  align-items: center;
+  padding: 14px 16px;
+  margin: 4px 8px;
+  cursor: pointer;
+  border-radius: 10px;
+  transition: all 0.3s ease;
+  overflow: hidden; /* To contain the pseudo-elements */
+}
+
+.nav-item::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2));
+  transition: left 0.4s ease;
+}
+
+.nav-item:hover::before {
+  left: 100%;
+}
+
+.nav-item:hover {
+  background-color: #374151; /* gray-700 */
+  transform: translateY(-2px);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+}
+
+.nav-item .indicator {
+  position: absolute;
+  left: 0;
+  top: 0;
+  height: 100%;
+  width: 5px;
+  background: #60a5fa; /* blue-400 */
+  border-radius: 0 2px 2px 0;
+  transform: translateX(-100%);
+  transition: transform 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+.nav-item.active .indicator {
+  transform: translateX(0);
+}
+
+.nav-item .icon {
+  font-size: 1.25rem; /* text-xl */
+  width: 2rem; /* w-8 */
+  text-align: center;
+  color: #9ca3af; /* gray-400 */
+  transition: all 0.3s ease;
+  z-index: 1;
+}
+
+.nav-item:hover .icon,
+.nav-item.active .icon {
+  color: white;
+  transform: scale(1.1);
+}
+
+.nav-item .title {
+  margin-left: 1rem; /* ml-4 */
+  font-weight: 600; /* font-semibold */
+  color: #d1d5db; /* gray-300 */
+  transition: color 0.3s ease;
+  z-index: 1;
+}
+
+.nav-item:hover .title,
+.nav-item.active .title {
+  color: white;
+}
+
+.nav-item.active {
+  background: linear-gradient(90deg, #3b82f6, #8b5cf6); /* blue-500 to purple-500 */
+  box-shadow: 0 5px 15px rgba(91, 99, 235, 0.4);
+}
+
+/* Adjust for collapsed state */
+.nav-item.collapsed {
+  justify-content: center;
+}
+
+.nav-item.collapsed .icon {
+  margin: 0;
+}
+
+/* Sub-menu styling */
+.sub-item {
+  padding-left: 3rem !important;
+  margin: 2px 8px 2px 16px !important;
+  border-radius: 8px !important;
+}
+
+.sub-item .icon {
+  font-size: 1rem;
+  width: 1.5rem;
+}
+
+.sub-item .title {
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.sub-item.active {
+  background: rgba(255, 255, 255, 0.1);
+  box-shadow: none;
+}
+
+.sub-item.active .indicator {
+  width: 4px;
+}
+
+/* Custom Scrollbar for the menu */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 4px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 10px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.3);
+}

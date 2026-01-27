@@ -80,3 +80,9 @@ export interface RevenueStats {
   customers: number;
   averagePerCustomer: number;
 }
+
+export interface AnnualChurnByGender {
+  year: number;
+  maleChurnRate: number;
+  femaleChurnRate: number;
+}
